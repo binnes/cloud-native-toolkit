@@ -43,7 +43,7 @@ openssl x509 -days 3560 -in ~/.minikube/certs/ingress_crt.csr -out ~/.minikube/c
 
 export SECRET_NAME=$(echo $DOMAIN | sed 's/\./-/g')-tls
 
-kubectl create secret generic tls-ca -n default --from-file=${HOME}/.minikube/certs/ca.pem
+kubectl create secret generic tls-ca -n default --from-file=${HOME}/.minikube/certs/rootCA_crt.pem
 kubectl label -n default secret tls-ca grouping=garage-cloud-native-toolkit
 
 kubectl create secret tls $SECRET_NAME -n default --cert=${HOME}/.minikube/certs/ingress_crt.pem --key=${HOME}/.minikube/certs/ingress_key.pem
@@ -53,7 +53,7 @@ kubectl create secret tls $SECRET_NAME -n kubernetes-dashboard --cert=${HOME}/.m
 
 ### Add the tlc CA certificate to your local machine / browser
 
-Each OS/browser is different.  On a Mac, generally clicking the cert in the file explorer will open the Keychain Access app and import the certificate.  You should then update the trust settings to Always Trust.  You need to import the ${HOME}/.minikube/certs/ca.pem and ${HOME}/.minikube/certs/ingress_crt.pem certificates.
+Each OS/browser is different.  On a Mac, generally clicking the cert in the file explorer will open the Keychain Access app and import the certificate.  You should then update the trust settings to Always Trust.  You need to import the ${HOME}/.minikube/certs/rootCA_crt.pem and ${HOME}/.minikube/certs/ingress_crt.pem certificates.
 
 ## Add the a local registry service
 
@@ -92,7 +92,7 @@ ansible-playbook --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 min
 
 SECRET_NAME=$(echo $DOMAIN | sed 's/\./-/g')-tls
 
-kubectl create secret generic tls-ca -n gitea --from-file=${HOME}/.minikube/certs/ca.pem
+kubectl create secret generic tls-ca -n gitea --from-file=${HOME}/.minikube/certs/rootCA_crt.pem
 
 kubectl create secret tls $SECRET_NAME -n gitea --cert=${HOME}/.minikube/certs/ingress_crt.pem --key=${HOME}/.minikube/certs/ingress_key.pem
 
@@ -205,7 +205,7 @@ spec:
               - /bin/sh
               - '-c'
               - >-
-                cp /tmp/ca.pem /usr/local/share/ca-certificates/tls.ca.crt &&
+                cp /tmp/rootCA_crt.pem /usr/local/share/ca-certificates/tls.ca.crt &&
                 /usr/sbin/update-ca-certificates
       terminationMessagePath: /dev/termination-log
       terminationMessagePolicy: File
@@ -277,7 +277,7 @@ kubectl apply --filename https://storage.googleapis.com/tekton-releases/triggers
 
 kubectl apply -f tekton-ingress.yaml
 
-kubectl create secret generic tls-ca -n tekton-pipelines --from-file=${HOME}/.minikube/certs/ca.pem
+kubectl create secret generic tls-ca -n tekton-pipelines --from-file=${HOME}/.minikube/certs/rootCA_crt.pem
 
 Update the tekton-pipelines-controller deployment in the tekton-pipelines namespace.  Modify the volumes section to get the tls CA certificate from the secret created above.  Modify the config-registry-cert entry to switch from a configMap to a secret:
 
@@ -306,7 +306,7 @@ cd ibm-garage-iteration-zero
 
 When creating the name space need to ensure tls-ca secret is in the namespace:
 
-```kubectl create secret generic tls-ca -n dev-bi --from-file=${HOME}/.minikube/certs/ca.pem```
+```kubectl create secret generic tls-ca -n dev-bi --from-file=${HOME}/.minikube/certs/rootCA_crt.pem```
 
 
 ## Useful commands
