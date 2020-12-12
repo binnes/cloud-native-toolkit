@@ -1,0 +1,16 @@
+---
+- name: Set repo name
+  set_fact: 
+    repoName: "{{ item | urlsplit('path') | basename | splitext | first }}"
+
+- name: Set repo as template repo
+  uri:
+    url: "https://gitea.{{ minikubeDomain }}/api/v1/repos/{{ gitea_organisation_username }}/{{ repoName }}"
+    user: "{{ gitea_user_username }}"
+    password: "{{ gitea_user_password }}"
+    force_basic_auth: true
+    method: PATCH
+    validate_certs: no
+    body: '{"template": true}'
+    body_format: json
+  register: user_repos

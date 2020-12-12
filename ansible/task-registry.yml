@@ -1,0 +1,43 @@
+---
+
+- name: Deloy the registry
+  community.kubernetes.k8s:
+    state: present
+    src: ../kubernetes/registry.yaml
+  retries: 5
+  delay: 5
+
+#- name: Deloy the registry ingress
+#  community.kubernetes.k8s:
+#    state: present
+#    src: ../kubernetes/registry-ingress.yaml
+#  retries: 5
+#  delay: 5
+
+- name: Deloy the registry ingress
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      kind: Ingress
+      apiVersion: networking.k8s.io/v1
+      metadata:
+        name: registry-ingress
+        namespace: kube-system
+        annotations:
+          nginx.ingress.kubernetes.io/proxy-body-size: '0'
+      spec:
+        tls:
+          - secretName: "{{ secretName }}"
+            hosts:
+              - "registry.{{ minikubeDomain }}"
+        rules:
+          - host: "registry.{{ minikubeDomain }}"
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: registry
+                      port:
+                        number: 80

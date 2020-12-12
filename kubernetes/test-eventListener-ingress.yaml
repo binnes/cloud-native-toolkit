@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test-listener-ingress
+  namespace: dev-bi
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+#    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  tls:
+    - secretName: 192-168-64-2-nip-io-tls
+      hosts:
+        - test-listener.192.168.64.2.nip.io  
+  rules:
+    - host: test-listener.192.168.64.2.nip.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: el-test-listener
+                port:
+                  number: 8080

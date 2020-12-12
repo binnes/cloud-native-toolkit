@@ -1,0 +1,124 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: registry-pv-claim
+  namespace: kube-system
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: registry
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    app: registry
+  template:
+    metadata:
+      labels:
+        actual-registry: 'true'
+        app: registry
+    spec:
+      volumes:
+        - name: registry-pv-storage
+          persistentVolumeClaim:
+            claimName: registry-pv-claim
+      containers:
+      - env:
+        - name: REGISTRY_STORAGE_DELETE_ENABLED
+          value: "true"
+        - name: REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY
+          value: "/data"
+        image: registry.hub.docker.com/library/registry:2.7.1
+        imagePullPolicy: IfNotPresent
+        name: registry
+        ports:
+        - containerPort: 5000
+          protocol: TCP
+        volumeMounts:
+        - mountPath: "/data"
+          name: registry-pv-storage
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: registry-proxy
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      registry-proxy: "true"
+      app: registry
+  template:
+    metadata:
+      labels:
+        registry-proxy: "true"
+        app: registry
+    spec:
+      containers:
+      - env:
+        - name: REGISTRY_HOST
+          value: registry.kube-system.svc.cluster.local
+        - name: REGISTRY_PORT
+          value: "80"
+        image: gcr.io/google_containers/kube-registry-proxy:0.4
+        imagePullPolicy: IfNotPresent
+        name: registry-proxy
+        ports:
+        - containerPort: 80
+          hostPort: 5000
+          name: registry
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: registry
+  name: registry
+  namespace: kube-system
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 5000
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 443
+  selector:
+    actual-registry: "true"
+    app: registry
+  sessionAffinity: None
+  type: ClusterIP

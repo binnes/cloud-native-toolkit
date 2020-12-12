@@ -1,0 +1,116 @@
+---
+# Generate a CA Root key and certificate
+
+- name: Generate the CA Private Key
+  community.crypto.openssl_privatekey:
+    path: "{{ home }}/.minikube/certs/rootCA_key.pem"
+    passphrase: password123
+    cipher: auto
+
+- name: Generate the Root CA certiciate signing request
+  community.crypto.openssl_csr:
+    path: "{{ home }}/.minikube/certs/rootCA_crt.csr"
+    privatekey_path: "{{ home }}/.minikube/certs/rootCA_key.pem"
+    privatekey_passphrase: password123
+    common_name: "{{ minikubeDomain }}-RootCA"
+    country_name: GB
+    organization_name: "Cloud Native Toolkit"
+    email_address: "admin@{{ minikubeDomain }}"
+    key_usage: 
+      - cRLSign
+      - digitalSignature
+      - keyCertSign
+      - keyAgreement
+    key_usage_critical: yes
+
+- name: Generate rootCA certificate
+  community.crypto.x509_certificate:
+    path: "{{ home }}/.minikube/certs/rootCA_crt.pem"
+    csr_path: "{{ home }}/.minikube/certs/rootCA_crt.csr"
+    privatekey_path: "{{ home }}/.minikube/certs/rootCA_key.pem"
+    privatekey_passphrase: password123
+    signature_algorithms: "sha512WithRSAEncryption"
+    selfsigned_not_after: "+820d"
+    provider: selfsigned
+
+# Generate Ingress server certificate 
+- name: Generate the Ingress private key
+  community.crypto.openssl_privatekey:
+    path: "{{ home }}/.minikube/certs/ingress_key.pem"
+    passphrase: password123
+    cipher: auto
+
+- name: Generate an unencrypted private key for kubernetes secret
+  command: openssl rsa -in {{ home }}/.minikube/certs/ingress_key.pem -passin pass:password123 -out {{ home }}/.minikube/certs/ingress_key_nopass.pem
+
+- name: Generate the Ingress certiciate signing request
+  community.crypto.openssl_csr:
+    path: "{{ home }}/.minikube/certs/ingress_crt.csr"
+    privatekey_path: "{{ home }}/.minikube/certs/ingress_key.pem"
+    privatekey_passphrase: password123
+    common_name: "*.{{ minikubeDomain }}"
+    country_name: GB
+    organization_name: "Cloud Native Toolkit"
+    email_address: "admin@{{ minikubeDomain }}"
+    subject_alt_name: 
+      - "DNS:*.{{ minikubeDomain }}"
+      - "DNS:{{ minikubeIP }}"
+    subject_alt_name_critical: yes
+    extended_key_usage:
+      - serverAuth
+    extended_key_usage_critical: yes
+
+
+- name: Generate certificate
+  community.crypto.x509_certificate:
+    path: "{{ home }}/.minikube/certs/ingress_crt.pem"
+    csr_path: "{{ home }}/.minikube/certs/ingress_crt.csr"
+    privatekey_path: "{{ home }}/.minikube/certs/ingress_key.pem"
+    privatekey_passphrase: password123
+    ownca_path: "{{ home }}/.minikube/certs/rootCA_crt.pem"
+    ownca_privatekey_path: "{{ home }}/.minikube/certs/rootCA_key.pem"
+    ownca_privatekey_passphrase: password123
+    ownca_not_after: "+820d"
+    signature_algorithms: "sha512WithRSAEncryption"
+    provider: ownca
+
+- name: Add certificate to OS as trusted root for SSL
+  command:
+    cmd: "security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain -u 63 -p ssl -p IPSec -p basic -p codeSign {{ home }}/.minikube/certs/rootCA_crt.pem"
+  become: true
+  when:
+    "ansible_facts['distribution'] == 'MacOSX'"
+
+- name: Update certificates Ingress uses to the newly generated cert
+  shell:
+    cmd: "kubectl create secret tls {{ secretName }} -n kube-system --cert={{ home }}/.minikube/certs/ingress_crt.pem --key={{ home }}/.minikube/certs/ingress_key_nopass.pem --dry-run=client -o yaml | kubectl apply -f -"
+#    cmd: "kubectl create secret generic {{ secretName }} -n kube-system --from-file=cert={{ home }}/.minikube/certs/ingress_crt.pem --from-file=key={{ home }}/.minikube/certs/ingress_key_nopass.pem --dry-run=client -o yaml | kubectl apply -f -"
+
+- name: Set the certificate as the Ingress default certificate
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      kind: Deployment
+      apiVersion: apps/v1
+      metadata:
+        name: ingress-nginx-controller
+        namespace: kube-system
+      spec:
+        template:
+          spec:
+            containers:
+              - name: controller
+                args:
+                  - /nginx-ingress-controller
+                  - '--default-ssl-certificate=$(POD_NAMESPACE)/{{ secretName }}'
+                  - '--configmap=$(POD_NAMESPACE)/nginx-load-balancer-conf'
+                  - '--report-node-internal-ip-address'
+                  - '--tcp-services-configmap=$(POD_NAMESPACE)/tcp-services'
+                  - '--udp-services-configmap=$(POD_NAMESPACE)/udp-services'
+                  - '--validating-webhook=:8443'
+                  - '--validating-webhook-certificate=/usr/local/certificates/cert'
+                  - '--validating-webhook-key=/usr/local/certificates/key'
+
+- name: Pause for 30 seconds to allow ingress to restart
+  pause:
+    seconds: 30

@@ -1,0 +1,35 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  annotations:
+    description: >-
+      ConfigMap to hold the ibmcloud configuration values used to access the
+      cluster environment (so that processes within the cluster can operate on
+      the cluster)
+    meta.helm.sh/release-name: cloud-setup
+    meta.helm.sh/release-namespace: default
+  name: ibmcloud-config
+  namespace: tools
+  labels:
+    app: cloud
+    grouping: garage-cloud-native-toolkit
+    app.kubernetes.io/part-of: cloud
+    app.kubernetes.io/instance: cloud-setup
+    release: cloud-setup
+    app.kubernetes.io/version: '1.0'
+    app.kubernetes.io/component: cloud
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: ibmcloud-0.3.1
+    app.kubernetes.io/name: cloud
+    group: catalyst-tools
+data:
+  REGISTRY_URL: 192.168.64.2:5000
+  RESOURCE_GROUP: ''
+  CLUSTER_NAME: 'minikube'
+  SERVER_URL: 'https://192.168.64.2:8443'
+  REGION: ''
+  APIURL: 'https://192.168.64.2:8443'
+  TLS_SECRET_NAME: '192-168-64-2-nip-io-tls'
+  REGISTRY_NAMESPACE: ''
+  INGRESS_SUBDOMAIN: 192.168.64.2.nip.io
+  CLUSTER_TYPE: kubernetes

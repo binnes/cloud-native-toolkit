@@ -1,0 +1,90 @@
+---
+- name: Set repo name
+  set_fact: 
+    repoName: "{{ item | urlsplit('path') | basename | splitext | first }}"
+
+- name: Get list of user repos
+  uri:
+    url: "https://gitea.{{ minikubeDomain }}/api/v1/orgs/{{ gitea_organisation_username }}/repos"
+    user: "{{ gitea_user_username }}"
+    password: "{{ gitea_user_password }}"
+    force_basic_auth: true
+    method: GET
+    validate_certs: no
+  register: user_repos
+
+- name: determine if local git already contains the repo
+  set_fact:
+    repo_exists: "{{ user_repos.json | to_json | from_json | json_query(query) > 0 }}"
+  vars:
+    query: "length([?name=='{{ repoName }}'])" 
+
+- name: Git checkout
+  git:
+    repo: "{{ item }}"
+    dest: "{{ home }}/Cn-Tk/{{ repoName }}"
+  when: 
+    "repo_exists == false"
+
+- name: Find default branch name of repo
+  command:
+    chdir: "{{ home }}/Cn-Tk/{{ repoName }}"
+    cmd: "git branch"
+  register: repo_branch_resp
+  when: 
+    "repo_exists == false" 
+
+- name: determine if local git already contains the repo
+  set_fact:
+    repo_branch: "{{ repo_branch_resp.stdout.split(' ') | last }}"
+  when: 
+    "repo_exists == false" 
+
+- name: remove git remote origin
+  command:
+    chdir: "{{ home }}/Cn-Tk/{{ repoName }}"
+    cmd: "git remote remove origin"
+  when: 
+    "repo_exists == false"
+
+- name: set local git as remote origin
+  command:
+    chdir: "{{ home }}/Cn-Tk/{{ repoName }}"
+    cmd: "git remote add origin https://gitea.{{ minikubeDomain }}/{{ gitea_organisation_username }}/{{ repoName }}.git"
+  when: 
+    "repo_exists == false"
+
+# create the repository on the local git server if it doesn't exist then push 
+
+- name: Create Git repository if not already exist
+  uri:
+    url: "https://gitea.{{ minikubeDomain }}/api/v1/orgs/{{ gitea_organisation_username }}/repos"
+    user: "{{ gitea_user_username }}"
+    password: "{{ gitea_user_password }}"
+    force_basic_auth: true
+    method: POST
+    body: >-
+      {
+        "auto_init": false,
+        "default_branch": "{{ repo_branch }}",
+        "description": "string",
+        "name": "{{ repoName }}",
+        "private": false,
+        "readme": "string",
+        "template": false,
+      }
+    body_format: json
+    validate_certs: no
+    status_code: 201
+  when: 
+    "repo_exists == false"
+
+- name: push content to local git
+  command:
+    chdir: "{{ home }}/Cn-Tk/{{ repoName }}"
+    cmd: "git push -u origin {{ repo_branch }}"
+  retries: 3
+  register: result
+  until: result.rc == 0
+  when: 
+    "repo_exists == false"

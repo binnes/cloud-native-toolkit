@@ -1,0 +1,6 @@
+---
+
+collections:
+  # Install collections from Ansible Galaxy.
+  - name: community.kubernetes
+  - name: community.general.docker_container

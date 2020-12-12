@@ -1,0 +1,34 @@
+---
+
+- name: Add dashboard ingress secret
+  shell: "kubectl create secret tls {{ secretName }} -n kubernetes-dashboard --cert={{ home }}/.minikube/certs/ingress_crt.pem --key={{ home }}/.minikube/certs/ingress_key_nopass.pem --dry-run=client -o yaml | 
+kubectl apply -f -"
+  ignore_errors: true
+
+- name: Deloy the kubernetes dashboard ingress
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: kubernetes-dashboard-ingress
+        namespace: kubernetes-dashboard
+      #  annotations:
+      #    nginx.ingress.kubernetes.io/rewrite-target: /$1
+      spec:
+        tls:
+          - secretName: "{{ secretName }}"
+            hosts:
+              - "kubernetes-dashboard.{{ minikubeDomain }}"
+        rules:
+          - host: "kubernetes-dashboard.{{ minikubeDomain }}"
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: kubernetes-dashboard
+                      port:
+                        number: 9090

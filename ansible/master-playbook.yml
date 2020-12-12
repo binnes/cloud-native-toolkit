@@ -1,0 +1,297 @@
+---
+
+- hosts: all
+  vars:
+    K8S_AUTH_CONTEXT: kubernetes
+    K8S_AUTH_KUBECONFIG: /home/vagrant/.kube/config
+  become: true
+  tasks:
+  - name: Install packages that allow apt to be used over HTTPS
+    apt:
+      name: "{{ packages }}"
+      state: present
+      update_cache: yes
+    vars:
+      packages:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg-agent
+      - software-properties-common
+
+  - name: Install ansible and its dependecies
+    apt: 
+      name: "{{ packages }}"
+      state: present
+      update_cache: yes
+    vars:
+      packages:
+      - ansible
+      - python3-pip
+
+  - name: Install openshift package
+    pip:
+      name: openshift
+
+  - name: Install docker and its dependecies
+    apt: 
+      name: "{{ packages }}"
+      state: present
+      update_cache: yes
+    vars:
+      packages:
+      - docker.io
+    notify:
+      - docker status
+
+  - name: Add vagrant user to docker group
+    user:
+      name: vagrant
+      group: docker
+
+  - name: Remove swapfile from /etc/fstab
+    mount:
+      name: "{{ item }}"
+      fstype: swap
+      state: absent
+    with_items:
+    - swap
+    - none
+
+  - name: Disable swap
+    command: swapoff -a
+    when: ansible_swaptotal_mb > 0
+
+  - name: enable ip4 forwarding in config file
+    replace:
+      path: /etc/sysctl.conf
+      regexp: '^#(.*net.ipv4.ip_forward.*)'
+      replace: '\1'
+
+  - name: enable ip4 forwarding
+    command: sysctl -p
+    become: yes
+
+  - name: Enable and start service docker and ensure it is not masked
+    systemd:
+      name: docker
+      enabled: yes
+      masked: no
+      state: started
+
+  - name: Add an apt signing key for Kubernetes
+    apt_key:
+      url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+      state: present
+
+  - name: Adding apt repository for Kubernetes
+    apt_repository:
+      repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+      state: present
+      filename: kubernetes.list
+
+  - name: Install Kubernetes binaries
+    apt: 
+      name: "{{ packages }}"
+      state: present
+      update_cache: yes
+    vars:
+      packages:
+        - kubelet 
+        - kubeadm 
+        - kubectl
+
+  - name: Configure node ip
+    lineinfile:
+      path: /etc/default/kubelet
+      line: KUBELET_EXTRA_ARGS=--node-ip={{ node_ip }}
+      create: yes
+
+  - name: Restart kubelet
+    service:
+      name: kubelet
+      daemon_reload: yes
+      state: restarted
+
+  - name: Initialize the Kubernetes cluster using kubeadm
+    command: kubeadm init --apiserver-advertise-address="192.168.50.10" --apiserver-cert-extra-sans="192.168.50.10"  --node-name k8s-master --pod-network-cidr=192.168.0.0/16
+
+  - name: Setup kube directory for vagrant user
+    file:
+      path: /home/vagrant/.kube
+      state: directory
+      owner: vagrant
+      group: vagrant
+
+  - name: Add config file to .kube directory for Vagrant user
+    copy:
+      src: /etc/kubernetes/admin.conf
+      dest: /home/vagrant/.kube/config
+      remote_src: yes
+      mode: '0600'
+      owner: vagrant
+      group: vagrant
+  
+  - name: Fetch config file to host
+    fetch:
+      src: /etc/kubernetes/admin.conf
+      dest: kube_vagrant.conf
+      flat: yes
+
+  - name: Install calico network operator
+    become: false
+    command: kubectl create -f https://docs.projectcalico.org/manifests/tigera-operator.yaml
+
+  - name: Install calico network custom resource definition
+    become: false
+    command: kubectl create -f https://docs.projectcalico.org/manifests/custom-resources.yaml
+
+  - name: Remove master node taint
+    become: false
+    command: kubectl taint nodes --all node-role.kubernetes.io/master-
+
+# Add Ansible community.kubernetes support
+  - name: Remove master node taint
+    become: false
+    command: ansible-galaxy collection install community.kubernetes
+
+# Add helm
+  - name: Add Helm repo key
+    apt_key:
+      url: https://baltocdn.com/helm/signing.asc
+      state: present 
+
+  - name: Adding apt repository for Kubernetes
+    apt_repository:
+      repo: deb https://baltocdn.com/helm/stable/debian/ all main
+      state: present
+      filename: helm-stable-debian.list
+
+  - name: Install Helm binary
+    apt: 
+      name: "{{ packages }}"
+      state: present
+      update_cache: yes
+    vars:
+      packages:
+        - helm
+
+  - name: Add default repository
+    become: yes
+    become_user: vagrant
+    community.kubernetes.helm_repository:
+      name: stable
+      repo_url: https://charts.helm.sh/stable
+
+  - name: Add Red Hat Helm charts repository
+    become: yes
+    become_user: vagrant
+    community.kubernetes.helm_repository:
+      name: redhat-charts
+      repo_url: https://redhat-developer.github.com/redhat-helm-charts
+
+  - name: Add Red Hat Helm charts repository
+    become: yes
+    become_user: vagrant
+    community.kubernetes.helm_repository:
+      name: redhat-charts
+      repo_url: https://redhat-developer.github.com/redhat-helm-charts
+
+  - name: Add bitnami Helm charts repository
+    become: yes
+    become_user: vagrant
+    community.kubernetes.helm_repository:
+      name: bitnami
+      repo_url: https://charts.bitnami.com/bitnami
+
+  - name: Deploy latest version of MetalLB load balancer
+    become: yes
+    become_user: vagrant
+    community.kubernetes.helm:
+      name: metallb
+      chart_ref: bitnami/metallb
+      release_namespace: metallb
+      create_namespace: true
+      values:
+        configInline:
+          address-pools:
+          - name: default
+            protocol: layer2
+            addresses:
+            - 192.168.50.100-192.168.50.120
+
+  - name: Add nginx ingress chart repository
+    become: yes
+    become_user: vagrant
+    community.kubernetes.helm_repository:
+      name: ingress-nginx
+      repo_url: https://kubernetes.github.io/ingress-nginx
+#      name: nginx-stable
+#      repo_url: https://helm.nginx.com/stable
+
+  - name: Deploy latest version of nginx ingress
+    become: yes
+    become_user: vagrant
+    community.kubernetes.helm:
+      name: ingress
+      chart_ref: ingress-nginx/ingress-nginx
+      release_namespace: ingress
+      create_namespace: true
+      values:
+        controller.setAsDefaultIngress: true
+
+  - name: Add kubernetes dashboard chart repository
+    become: yes
+    become_user: vagrant
+    community.kubernetes.helm_repository:
+      name: kubernetes-dashboard
+      repo_url: https://kubernetes.github.io/dashboard/
+
+  - name: Deploy latest version of dashboard
+    become: yes
+    become_user: vagrant
+    community.kubernetes.helm:
+      name: kubernetes-dashboard
+      chart_ref: kubernetes-dashboard/kubernetes-dashboard
+      release_namespace: kubernetes-dashboard
+      create_namespace: true
+      values:
+        service.type: LoadBalancer
+        ingress.enabled: true
+        ingress.hosts: 
+          - dashboard.cluster.local
+        ingress.annotations:
+          - kubernetes.io/ingress.class: 'nginx'
+          - nginx.ingress.kubernetes.io/ssl-redirect: true
+          - nginx.ingress.kubernetes.io/secure-backends: true
+          - nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+
+  - name: Add kubernetes gitea chart repository
+    become: yes
+    become_user: vagrant
+    community.kubernetes.helm_repository:
+      name: keyporttech
+      repo_url: https://keyporttech.github.io/helm-charts/
+
+  - name: Deploy latest version of gitea
+    become: yes
+    become_user: vagrant
+    community.kubernetes.helm:
+      name: gitea
+      chart_ref: keyporttech/gitea
+      release_namespace: gitea
+      create_namespace: true
+      values:
+        ingress.enabled: true
+#        ingress.annotations:
+#          - kubernetes.io/ingress.class: nginx
+        persistence.enabled: true
+        persistence.annotations:
+          - helm.sh/resource-policy: keep
+        services.http.externalHost: gitea.cluster.local
+#        service.ssh.serviceType: LoadBalancer
+#        service.http:serviceType: NodePort
+
+  handlers:
+  - name: docker status
+    service: name=docker state=started

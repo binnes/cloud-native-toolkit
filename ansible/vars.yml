@@ -1,0 +1,28 @@
+---
+
+# Minikube config
+# minikube_conifg: "${HOME}/.kube.config"
+minikube_context: "minikube"
+
+gitea_admin_username: "gitea_admin"
+gitea_admin_password: "r8sA8CPHD9!bt6d"
+gitea_organisation_name: "Cloud Native Toolkit"
+gitea_organisation_username: "cloudNativeToolkit"
+gitea_user_username: "demo"
+gitea_user_password: "dem0P4s$"
+gitea_user_email: "demo@local.home"
+
+git_repos:
+  - "https://github.com/binnes/ibm-garage-iteration-zero.git"
+  - "https://github.com/binnes/terraform-tools-argocd.git"
+  - "https://github.com/binnes/terraform-tools-dashboard.git"
+  - "https://github.com/binnes/terraform-tools-jenkins.git"
+  - "https://github.com/binnes/ibm-garage-tekton-tasks.git"
+
+starterkit_repos:
+  - "https://github.com/IBM/template-node-react.git"
+  - "https://github.com/IBM/template-node-angular.git"
+  - "https://github.com/IBM/template-graphql-typescript.git"
+  - "https://github.com/IBM/template-node-typescript.git"
+  - "https://github.com/IBM/template-java-spring.git"
+  - "https://github.com/IBM/template-go-gin.git"
