@@ -56,12 +56,13 @@
         minikubeIP: "{{ minikube.stdout }}"
         minikubeDomain: "{{ minikube.stdout }}.nip.io"
         home: "{{ lookup('env', 'HOME') }}"
-#        secretName: "{{ minikube.stdout ~ '.nip.io' | replace('.','-') }}-tls"
         secretName: "ingress-tls"
 
+# Create TLS certificates authority and ingress certificate
     - name: Setup TLS certificate for ingress
       include_tasks: task-tls-certificate.yml
 
+# Configure helm repositories
     - name: Add Red Hat Helm charts repository
       community.kubernetes.helm_repository:
         name: redhat-charts
@@ -77,121 +78,41 @@
         name: gitea-charts
         repo_url: https://dl.gitea.io/charts/
 
+# Update the Operator manager to use the latest image, as there are known issues 
+# with pod dying due to an Out of Memory condition
+    - name: Update the Operator image to use the latest
+      community.kubernetes.k8s:
+        state: present
+        name: catalog-operator
+        namespace: olm
+        definition:
+          kind: Deployment
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: catalog-operator
+                    image: quay.io/operator-framework/olm:latest
+                    args:
+                      - '-namespace'
+                      - olm
+                      - >-
+                        -configmapServerImage=quay.io/operator-framework/configmap-operator-registry:latest
+                      - '-util-image'
+                      - >-
+                        quay.io/operator-framework/olm:latest
+
+# Install a local image registry
     - name: Install local container registry 
       include_tasks: task-registry.yml
 
+# Make the dashboard available through the Ingress service
     - name: Deloy the dashboard ingress
       include_tasks: task-kube-dashboard-ingress.yml
 
-    - name: Deploy latest version of gitea
-      community.kubernetes.helm:
-        name: gitea
-        chart_ref: gitea-charts/gitea
-        release_namespace: gitea
-        create_namespace: true
-        values:
-          ingress.enabled: true
-          ingress.annotations: 
-            - kubernetes.io/ingress.class: ingress-nginx
-            - nginx.ingress.kubernetes.io/proxy-body-size: 0
-          ingress.hosts:
-            - gitea.{{ minikubeDomain }}
-          persistence.enabled: true
-          persistence.annotations:
-            - helm.sh/resource-policy: keep
-          gitea.admin.username: "{{ gitea_admin_username }}"
-          gitea.admin.password: "{{ gitea_admin_password }}"
-          gitea.config:
-            DOMAIN: "{{ minikubeDomain }}"
-
-    - name: Add tls CA cert for Gitea
-      command: kubectl create secret generic tls-ca -n gitea --from-file=${HOME}/.minikube/certs/rootCA_crt.pem
-      ignore_errors: true
-
-    - name: Add gitea ingress secret
-      command: kubectl create secret tls {{ secretName }} -n gitea --cert={{ home }}/.minikube/certs/ingress_crt.pem --key={{ home }}/.minikube/certs/ingress_key_nopass.pem
-      ignore_errors: true
-
-    - name: Deloy the gitea ingress
-      community.kubernetes.k8s:
-        state: present
-        src: ../kubernetes/gitea-ingress.yaml
-
-    - name: add CA cert to deployment to accept local certs
-      community.kubernetes.k8s:
-        state: present
-        merge_type: merge
-        src: ../kubernetes/gitea-stateful-set-update.yaml
-
-# Create Gitea user
-    - name: Get list of Git Users
-      uri:
-        url: "https://gitea.{{ minikubeDomain }}/api/v1/admin/users"
-        user: "{{ gitea_admin_username }}"
-        password: "{{ gitea_admin_password }}"
-        force_basic_auth: true
-        method: GET
-        validate_certs: no
-      register: user_req
-
-    - name: Create Git User if not already exist
-      uri:
-        url: "https://gitea.{{ minikubeDomain }}/api/v1/admin/users"
-        user: "{{ gitea_admin_username }}"
-        password: "{{ gitea_admin_password }}"
-        force_basic_auth: true
-        method: POST
-        body: >-
-          { 
-            "email": "{{ gitea_user_email }}",
-            "full_name": "{{ gitea_user_username }}",
-            "login_name": "{{ gitea_user_username }}",
-            "must_change_password": false,
-            "password": "{{ gitea_user_password }}",
-            "send_notify": false,
-            "source_id": 0,
-            "username": "{{ gitea_user_username }}"
-          }
-        body_format: json
-        validate_certs: no
-        status_code: 201
-      vars:
-        query: "length([?contains(username, '{{ gitea_user_username }}')])"
-# Need to convert to and from JSON to force unicode strings to ascii so JMEPath library doesn't fail - workaround to known bug!!!
-      when:
-          "user_req.json | to_json | from_json | json_query(query) == 0"
-
-# Create Gitea user org
-    - name: Get list of Organisations
-      uri:
-        url: "https://gitea.{{ minikubeDomain }}/api/v1/admin/orgs"
-        user: "{{ gitea_admin_username }}"
-        password: "{{ gitea_admin_password }}"
-        force_basic_auth: true
-        method: GET
-        validate_certs: no
-      register: org_req
-
-    - name: Create user Organisation if not already exists
-      uri:
-        url: "https://gitea.{{ minikubeDomain }}/api/v1/admin/users/{{ gitea_user_username }}/orgs"
-        user: "{{ gitea_admin_username }}"
-        password: "{{ gitea_admin_password }}"
-        force_basic_auth: true
-        method: POST
-        body: >-
-          { 
-          "full_name" : "{{ gitea_organisation_name }}",
-          "username" : "{{ gitea_organisation_username }}"
-          }
-        body_format: json
-        validate_certs: no
-        status_code: 201
-      vars:
-        query: "length([?contains(username, '{{ gitea_organisation_username }}')])"
-# Need to convert to and from JSON to force unicode strings to ascii so JMEPath library doesn't fail - workaround to known bug!!!
-      when:
-          "org_req.json | to_json | from_json | json_query(query) == 0"
+# Install a local git server so webhooks work locally
+    - name: Deloy and configure Gitea service
+      include_tasks: task-gitea.yml
 
 # Clone git repos and push to local git - uses external playbook as can't use loop for a block
     - name: Call external playbook to clone and push git repo to local git
@@ -208,93 +129,19 @@
       include_tasks: set_git_template.yaml
       loop: "{{ starterkit_repos }}"
 
-
 # Install Che
-    - name: Fetch Che command line tool
-      get_url:
-        url: https://www.eclipse.org/che/chectl/
-        dest: /tmp/install.sh
-        mode: 0775
-    
-    - name: Install Che Command line tool
-      command: /tmp/install.sh
-      become: true
-
-    - name: Install Che
-      command: chectl server:deploy --platform minikube
-
-    - name: Patch Che to allow multipe workspaces
-      community.kubernetes.k8s:
-        state: present
-        definition:
-          api_version: org.eclipse.che/v1
-          kind: CheCluster
-          metadata:
-            name: eclipse-che
-            namespace: che
-          spec: 
-            server: 
-              customCheProperties: 
-                CHE_LIMITS_USER_WORKSPACE_RUN_COUNT: "-1"
-
+    - name: Deloy and configure Che service
+      include_tasks: task-che.yml
 
 # Install tekton components - pipeline, dashboard and triggers
-    - name: Retrieve latest Tekton pipeline description
-      get_url:
-        url: https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
-        dest: ~/Cn-Tk/tekton-pipeline-release.yaml
+    - name: Deloy and configure Tekton service
+      include_tasks: task-tekton.yml
 
-    - name: Retrieve latest Tekton dashboard description
-      get_url:
-        url: https://storage.googleapis.com/tekton-releases/dashboard/latest/tekton-dashboard-release.yaml
-        dest: ~/Cn-Tk/tekton-dashboard-release.yaml
+# Install Cloud Native Toolkit using Terraform within a container
+    - name: Deloy Cloud Native Toolkit using terraform
+      include_tasks: task-CloudNativeToolkit.yml
 
-    - name: Retrieve latest Tekton triggers description
-      get_url:
-        url: https://storage.googleapis.com/tekton-releases/triggers/latest/release.yaml
-        dest: ~/Cn-Tk/tekton-triggers-release.yaml
-      
-    - name: Install Tekton pipelines
-      community.kubernetes.k8s:
-        src:  ~/Cn-Tk/tekton-pipeline-release.yaml
-
-    - name: Install Tekton pipelines
-      community.kubernetes.k8s:
-        src:  ~/Cn-Tk/tekton-dashboard-release.yaml
-
-    - name: Install Tekton pipelines
-      community.kubernetes.k8s:
-        src:  ~/Cn-Tk/tekton-triggers-release.yaml
-
-    - name: Install Tekton Ingress
-      community.kubernetes.k8s:
-        src:  ../kubernetes/tekton-ingress.yaml
-      
-    - name: Add tls CA cert for Tekton
-      command: kubectl create secret generic tls-ca -n tekton-pipelines --from-file=${HOME}/.minikube/certs/rootCA_crt.pem
-      ignore_errors: true
-
-    - name: Patch Tekton pipeline controller to pull in TLS CA cert
-      community.kubernetes.k8s:
-        merge_type: 
-          - merge
-        kind: Deployment
-        name: tekton-pipelines-controller
-        namespace: tekton-pipelines
-        definition:
-          spec: 
-            template:
-              spec: 
-                volumes:
-                  - name: config-logging
-                    configMap:
-                      name: config-logging
-                  - name: config-registry-cert
-                    secret:
-                      secretName: tls-ca
-                      defaultMode: 420
-
-# Configure Tekton and install pipelines and tasks
+# Install Cloud Native Toolkit pipelines and tasks
 
     - name: Install tasks
       k8s:
@@ -311,59 +158,3 @@
         namespace: tools
       with_fileglob:
         - "{{ home }}/Cn-Tk/ibm-garage-tekton-tasks/pipelines/*.yaml"
-
-# Install Cloud Native Toolkit using Terraform within a container
-
-    - name: Add tls CA cert for Cloud Native Toolkit resources
-      command: kubectl create secret generic tls-ca -n default --from-file=${HOME}/.minikube/certs/rootCA_crt.pem
-      ignore_errors: true
-    
-    - name: Patch CA cert secret so it gets copied into tool namespace
-      command: kubectl patch secret tls-ca -n default -p '{"metadata":{"labels":{"grouping":"garage-cloud-native-toolkit"}}}'
-
-    - name: Add ingress secret
-      command: kubectl create secret tls {{ secretName }} -n default --cert={{ home }}/.minikube/certs/ingress_crt.pem --key={{ home }}/.minikube/certs/ingress_key_nopass.pem
-      ignore_errors: true
-
-    - name: Patch ingress secret so it gets copied into tool namespace
-      command: kubectl patch secret {{ secretName }} -n default -p '{"metadata":{"labels":{"grouping":"garage-cloud-native-toolkit"}}}'
-
-    - name: Pull the install image
-      community.general.docker_image:
-        name: quay.io/ibmgaragecloud/cli-tools:v0.9.0-lite
-        source: pull
-
-    - name: Ensure no previous docker container exists
-      community.general.docker_container:
-        name: CNTK-installer
-        container_default_behavior: no_defaults
-        force_kill: yes
-        state: absent
-
-    - name: Deploy rest of the Cloud Native Toolkit
-      community.general.docker_container:
-        name: CNTK-installer
-        image: quay.io/ibmgaragecloud/cli-tools:v0.9.0-lite
-        container_default_behavior: no_defaults
-        interactive: yes
-        tty: yes
-        detach: no
-        debug: yes
-        log_driver: json-file
-        output_logs: yes
-        cleanup: yes
-        env:
-          TF_VAR_ibmcloud_api_key: ""
-          TF_VAR_login_user: ""
-          TF_VAR_login_password: ""
-          TF_VAR_login_token: ""
-          TF_VAR_server_url: "https://{{ minikubeIP }}:8443"
-          IBMCLOUD_API_KEY: ""
-          IAAS_CLASSIC_USERNAME: ""
-          IAAS_CLASSIC_API_KEY: ""
-        volumes:
-          - "{{ home }}/Cn-Tk/ibm-garage-iteration-zero/terraform:/home/devops/src"
-          - "{{ home }}/.kube/config:/home/devops/.kube/config"
-          - "{{ home }}/.minikube:/home/devops/.minikube"
-        working_dir: /home/devops/src
-        command: "/home/devops/src/runTerraform.sh -k -a"

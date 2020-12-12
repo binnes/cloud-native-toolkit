@@ -1,0 +1,57 @@
+---
+
+# Install tekton components - pipeline, dashboard and triggers
+- name: Retrieve latest Tekton pipeline description
+  get_url:
+    url: https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
+    dest: ~/Cn-Tk/tekton-pipeline-release.yaml
+
+- name: Retrieve latest Tekton dashboard description
+  get_url:
+    url: https://storage.googleapis.com/tekton-releases/dashboard/latest/tekton-dashboard-release.yaml
+    dest: ~/Cn-Tk/tekton-dashboard-release.yaml
+
+- name: Retrieve latest Tekton triggers description
+  get_url:
+    url: https://storage.googleapis.com/tekton-releases/triggers/latest/release.yaml
+    dest: ~/Cn-Tk/tekton-triggers-release.yaml
+  
+- name: Install Tekton pipelines
+  community.kubernetes.k8s:
+    src:  ~/Cn-Tk/tekton-pipeline-release.yaml
+
+- name: Install Tekton pipelines
+  community.kubernetes.k8s:
+    src:  ~/Cn-Tk/tekton-dashboard-release.yaml
+
+- name: Install Tekton pipelines
+  community.kubernetes.k8s:
+    src:  ~/Cn-Tk/tekton-triggers-release.yaml
+
+- name: Install Tekton Ingress
+  community.kubernetes.k8s:
+    src:  ../kubernetes/tekton-ingress.yaml
+  
+- name: Add tls CA cert for Tekton
+  command: kubectl create secret generic tls-ca -n tekton-pipelines --from-file=${HOME}/.minikube/certs/rootCA_crt.pem
+  ignore_errors: true
+
+- name: Patch Tekton pipeline controller to pull in TLS CA cert
+  community.kubernetes.k8s:
+    merge_type: 
+      - merge
+    kind: Deployment
+    name: tekton-pipelines-controller
+    namespace: tekton-pipelines
+    definition:
+      spec: 
+        template:
+          spec: 
+            volumes:
+              - name: config-logging
+                configMap:
+                  name: config-logging
+              - name: config-registry-cert
+                secret:
+                  secretName: tls-ca
+                  defaultMode: 420

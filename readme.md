@@ -1,3 +1,22 @@
+# Cloud Native Toolkit
+
+This repo is based on the [Cloud Native Toolkit](https://cloudnativetoolkit.dev).  The content of this repository extend the toolkit to run on a pure open source stack, based on minikube.
+
+NOTE:  THIS REPOSITORY IS STILL A WORK IN PROGRESS
+
+## Prerequisites
+
+Currently only tested on an Intel based Mac with 16GB of memory or more.minikube 
+
+This content will currently only run on systmes capable of running AMD64 architecture containers, as many of the components are only provided in this architecture
+
+- Docker
+- Ansible
+- Minikube
+- Git
+
+## Setup instructions
+
 install minikube
 
 instructions [here](https://minikube.sigs.k8s.io/docs/start/)
@@ -7,11 +26,17 @@ brew install minikube
 !!!Info
     Ideally you want to know the IP address your cluster will be assigned before it is created.  On MacOS using hyperkit you can do this by looking at file /var/db/dhcpd_leases.  Your machine will be allocated the next available IP address.  If the file does not exist or is empty then you will be assigned 192.168.64.2.  Use this address in the start command to reduce the bumber of manual fixes needed.
 
+### Start the Kubernetes cluster
+
+To create the minikube cluster, run the following command, adjusting the CPU and memory settings to match your configuration.  You want to give the stack as much memory as possible to get good working performance.
+
 minikube start --addons=dashboard --addons=ingress --addons=olm --addons=metrics-server --addons=istio-provisioner --addons=istio --cpus=8 --disk-size=250g --memory=48g --embed-certs --driver hyperkit --insecure-registry 192.168.64.2:5000
 
 verify the cluster ip address with minikube ip
 
-Update catalog-operator Deployment in namespace olm to use image : ```quay.io/operator-framework/olm:v0.17.0```,  which fixes an out of memory crash
+!!!Info
+    This is now done in the ansible playbook
+    Update catalog-operator Deployment in namespace olm to use image : ```quay.io/operator-framework/olm:v0.17.0```,  which fixes an out of memory crash
 
 Bring up the dashboard with command ```minikube dashboard```, switch to **All namespaces** and then highlight **Workloads** in the side menu.  You shoud see all pods working
 
@@ -24,6 +49,18 @@ On first boot your IP address may not be 192.168.64.2, so run commnd ```minikube
 Do the same with file ~/.minikube/machines/minikube/config.json - ensue the Insecure Registry entry contains the correct IP address.
 
 Restart minikube with minikube stop then repeat the start command above, replacing the insecure-registry option to the correct IP address for minikube
+
+## Run the ansible installer to complete the setup
+
+In a command window:
+
+- clone this git repository: ```git clone https://github.com/binnes/cloud-native-toolkit.git```
+- change into the ansible directory: ```cd cloud-native-toolkit/ansible```
+- run the playbook: ```ansible-playbook --ask-become-pass minicube-playbook.yml```
+
+# Information only
+
+The following steps are all completed by the ansible installer
 
 ## Add certificate for TLS - now completed by Ansible
 
@@ -39,7 +76,7 @@ openssl req -newkey rsa:4096 -nodes -out ~/.minikube/certs/ingress_crt.csr -keyo
 
 openssl x509 -days 3560 -in ~/.minikube/certs/ingress_crt.csr -out ~/.minikube/certs/ingress_crt.pem -req -sha256 -CA ~/.minikube/certs/ca.pem -passin pass:password123 -CAkey ~/.minikube/certs/ca-key.pem -extensions v3_req -extfile <(printf "\n[ req ]\nattributes = req_attributes\nreq_extensions = v3_req\ndistinguished_name = req_distinguished_name\n[req_distinguished_name]\n[ req_attributes ]\n[ v3_req ]\nsubjectAltName = DNS:*.${DOMAIN}") -set_serial 11
 
-### Add the tls certificate to the cluster as a secret
+### Add the tls certificate to the cluster as a secret - now done by Ansible
 
 export SECRET_NAME=$(echo $DOMAIN | sed 's/\./-/g')-tls
 
@@ -55,7 +92,7 @@ kubectl create secret tls $SECRET_NAME -n kubernetes-dashboard --cert=${HOME}/.m
 
 Each OS/browser is different.  On a Mac, generally clicking the cert in the file explorer will open the Keychain Access app and import the certificate.  You should then update the trust settings to Always Trust.  You need to import the ${HOME}/.minikube/certs/rootCA_crt.pem and ${HOME}/.minikube/certs/ingress_crt.pem certificates.
 
-## Add the a local registry service
+## Add a local registry service - now done by Ansible
 
 !!! Warning
     The registry addon does not persist content over a minikube restart, so manually deploying the registry:
@@ -78,11 +115,11 @@ Each OS/browser is different.  On a Mac, generally clicking the cert in the file
 kubectl create secret generic registry-access -n default --from-literal=REGISTRY_URL=registry.$DOMAIN:5000 --from-literal='REGISTRY_NAMESPACE=kube-system'
 kubectl label -n default secret registry-access grouping=garage-cloud-native-toolkit
 
-## Expose the dashboard via the Ingress
+## Expose the dashboard via the Ingress - now done by Ansible
 
 kubectl apply -f kubernetes-dashboard-ingress.yaml
 
-## Install gitea via Ansible
+## Install gitea via Ansible - now done by Ansible
 
 cd kubernetes-setup
 

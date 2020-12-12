@@ -1,0 +1,55 @@
+---
+
+- name: Add tls CA cert for Cloud Native Toolkit resources
+  command: kubectl create secret generic tls-ca -n default --from-file=${HOME}/.minikube/certs/rootCA_crt.pem
+  ignore_errors: true
+
+- name: Patch CA cert secret so it gets copied into tool namespace
+  command: kubectl patch secret tls-ca -n default -p '{"metadata":{"labels":{"grouping":"garage-cloud-native-toolkit"}}}'
+
+- name: Add ingress secret
+  command: kubectl create secret tls {{ secretName }} -n default --cert={{ home }}/.minikube/certs/ingress_crt.pem --key={{ home }}/.minikube/certs/ingress_key_nopass.pem
+  ignore_errors: true
+
+- name: Patch ingress secret so it gets copied into tool namespace
+  command: kubectl patch secret {{ secretName }} -n default -p '{"metadata":{"labels":{"grouping":"garage-cloud-native-toolkit"}}}'
+
+- name: Pull the install image
+  community.general.docker_image:
+    name: quay.io/ibmgaragecloud/cli-tools:v0.9.0-lite
+    source: pull
+
+- name: Ensure no previous docker container exists
+  community.general.docker_container:
+    name: CNTK-installer
+    container_default_behavior: no_defaults
+    force_kill: yes
+    state: absent
+
+- name: Deploy rest of the Cloud Native Toolkit
+  community.general.docker_container:
+    name: CNTK-installer
+    image: quay.io/ibmgaragecloud/cli-tools:v0.9.0-lite
+    container_default_behavior: no_defaults
+    interactive: yes
+    tty: yes
+    detach: no
+    debug: yes
+    log_driver: json-file
+    output_logs: yes
+    cleanup: yes
+    env:
+      TF_VAR_ibmcloud_api_key: ""
+      TF_VAR_login_user: ""
+      TF_VAR_login_password: ""
+      TF_VAR_login_token: ""
+      TF_VAR_server_url: "https://{{ minikubeIP }}:8443"
+      IBMCLOUD_API_KEY: ""
+      IAAS_CLASSIC_USERNAME: ""
+      IAAS_CLASSIC_API_KEY: ""
+    volumes:
+      - "{{ home }}/Cn-Tk/ibm-garage-iteration-zero/terraform:/home/devops/src"
+      - "{{ home }}/.kube/config:/home/devops/.kube/config"
+      - "{{ home }}/.minikube:/home/devops/.minikube"
+    working_dir: /home/devops/src
+    command: "/home/devops/src/runTerraform.sh -k -a"

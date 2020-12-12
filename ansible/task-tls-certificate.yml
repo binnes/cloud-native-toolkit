@@ -111,6 +111,17 @@
                   - '--validating-webhook-certificate=/usr/local/certificates/cert'
                   - '--validating-webhook-key=/usr/local/certificates/key'
 
-- name: Pause for 30 seconds to allow ingress to restart
+- name: Pause for 20 seconds to allow ingress to restart
   pause:
-    seconds: 30
+    seconds: 20
+
+- name: Wait for ingress to be available
+  community.kubernetes.k8s_info:
+    kind: Deployment
+    label_selectors: 
+        - app.kubernetes.io/name = ingress-nginx
+  register: output_info
+  until: output_info.resources | json_query('[*].status.conditions[?reason==`NewReplicaSetAvailable`][].status') | select ('match','True') | list | length == 1
+  delay: 6
+  retries: 10
+

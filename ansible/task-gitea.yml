@@ -1,0 +1,115 @@
+---
+
+- name: Deploy latest version of gitea
+  community.kubernetes.helm:
+    name: gitea
+    chart_ref: gitea-charts/gitea
+    release_namespace: gitea
+    create_namespace: true
+    values:
+      ingress.enabled: true
+      ingress.annotations: 
+        - kubernetes.io/ingress.class: ingress-nginx
+        - nginx.ingress.kubernetes.io/proxy-body-size: 0
+      ingress.hosts:
+        - gitea.{{ minikubeDomain }}
+      persistence.enabled: true
+      persistence.annotations:
+        - helm.sh/resource-policy: keep
+      gitea.admin.username: "{{ gitea_admin_username }}"
+      gitea.admin.password: "{{ gitea_admin_password }}"
+      gitea.config:
+        DOMAIN: "{{ minikubeDomain }}"
+
+- name: Add tls CA cert for Gitea
+  command: kubectl create secret generic tls-ca -n gitea --from-file=${HOME}/.minikube/certs/rootCA_crt.pem
+  ignore_errors: true
+
+- name: Add gitea ingress secret
+  command: kubectl create secret tls {{ secretName }} -n gitea --cert={{ home }}/.minikube/certs/ingress_crt.pem --key={{ home }}/.minikube/certs/ingress_key_nopass.pem
+  ignore_errors: true
+
+- name: Deloy the gitea ingress
+  community.kubernetes.k8s:
+    state: present
+    src: ../kubernetes/gitea-ingress.yaml
+
+- name: add CA cert to deployment to accept local certs
+  community.kubernetes.k8s:
+    state: present
+    merge_type: merge
+    src: ../kubernetes/gitea-stateful-set-update.yaml
+
+# Create Gitea user
+# Note first few attempts will fail as gitea takes a little time to start
+- name: Get list of Git Users
+  uri:
+    url: "https://gitea.{{ minikubeDomain }}/api/v1/admin/users"
+    user: "{{ gitea_admin_username }}"
+    password: "{{ gitea_admin_password }}"
+    force_basic_auth: true
+    method: GET
+    validate_certs: no
+  register: user_req
+  until: user_req.status == 200
+  delay: 10
+  retries: 24
+
+- name: Create Git User if not already exist
+  uri:
+    url: "https://gitea.{{ minikubeDomain }}/api/v1/admin/users"
+    user: "{{ gitea_admin_username }}"
+    password: "{{ gitea_admin_password }}"
+    force_basic_auth: true
+    method: POST
+    body: >-
+      { 
+        "email": "{{ gitea_user_email }}",
+        "full_name": "{{ gitea_user_username }}",
+        "login_name": "{{ gitea_user_username }}",
+        "must_change_password": false,
+        "password": "{{ gitea_user_password }}",
+        "send_notify": false,
+        "source_id": 0,
+        "username": "{{ gitea_user_username }}"
+      }
+    body_format: json
+    validate_certs: no
+    status_code: 201
+  vars:
+    query: "length([?contains(username, '{{ gitea_user_username }}')])"
+# Need to convert to and from JSON to force unicode strings to ascii so JMEPath library doesn't fail - workaround to known bug!!!
+  when:
+      "user_req.json | to_json | from_json | json_query(query) == 0"
+
+# Create Gitea user org
+- name: Get list of Organisations
+  uri:
+    url: "https://gitea.{{ minikubeDomain }}/api/v1/admin/orgs"
+    user: "{{ gitea_admin_username }}"
+    password: "{{ gitea_admin_password }}"
+    force_basic_auth: true
+    method: GET
+    validate_certs: no
+  register: org_req
+
+- name: Create user Organisation if not already exists
+  uri:
+    url: "https://gitea.{{ minikubeDomain }}/api/v1/admin/users/{{ gitea_user_username }}/orgs"
+    user: "{{ gitea_admin_username }}"
+    password: "{{ gitea_admin_password }}"
+    force_basic_auth: true
+    method: POST
+    body: >-
+      { 
+      "full_name" : "{{ gitea_organisation_name }}",
+      "username" : "{{ gitea_organisation_username }}"
+      }
+    body_format: json
+    validate_certs: no
+    status_code: 201
+  vars:
+    query: "length([?contains(username, '{{ gitea_organisation_username }}')])"
+# Need to convert to and from JSON to force unicode strings to ascii so JMEPath library doesn't fail - workaround to known bug!!!
+  when:
+      "org_req.json | to_json | from_json | json_query(query) == 0"
