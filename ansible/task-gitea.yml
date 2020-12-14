@@ -13,13 +13,23 @@
         - nginx.ingress.kubernetes.io/proxy-body-size: 0
       ingress.hosts:
         - gitea.{{ minikubeDomain }}
+      ingress.tls:
+        - secretName: ingress-tls
+          hosts:
+            - gitea.{{ minikubeDomain }}
       persistence.enabled: true
       persistence.annotations:
         - helm.sh/resource-policy: keep
-      gitea.admin.username: "{{ gitea_admin_username }}"
-      gitea.admin.password: "{{ gitea_admin_password }}"
-      gitea.config:
-        DOMAIN: "{{ minikubeDomain }}"
+      gitea:
+        admin:
+          username: "{{ gitea_admin_username }}"
+          password: "{{ gitea_admin_password }}"
+        config:
+          server:
+#            ROOT_URL: "https://gitea.{{ minikubeDomain }}"
+#            PROTOCOL: "https"
+            DOMAIN: "{{ minikubeDomain }}"
+            SSH_DOMAIN: "{{ minikubeDomain }}"
 
 - name: Add tls CA cert for Gitea
   command: kubectl create secret generic tls-ca -n gitea --from-file=${HOME}/.minikube/certs/rootCA_crt.pem
