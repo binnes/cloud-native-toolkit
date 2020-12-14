@@ -158,3 +158,20 @@
         namespace: tools
       with_fileglob:
         - "{{ home }}/Cn-Tk/ibm-garage-tekton-tasks/pipelines/*.yaml"
+    
+    - name: Add Tekton to the developer dashboard
+      community.kubernetes.k8s:
+        state: present
+        definition:
+          kind: ConfigMap
+          apiVersion: v1
+          metadata:
+            name: tekton-config
+            namespace: tools
+            lables:
+              app.kubernetes.io/component: tools
+              app.kubernetes.io/name: tekton-config
+              app.kubernetes.io/part-of: catalyst
+              group: catalyst-tools
+          data:
+            TEKTON_URL: 'https://tekton-dashboard.192.168.64.2.nip.io/'
