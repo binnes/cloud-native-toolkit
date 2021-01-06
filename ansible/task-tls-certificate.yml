@@ -5,6 +5,8 @@
   community.crypto.openssl_privatekey:
     path: "{{ home }}/.minikube/certs/rootCA_key.pem"
     passphrase: password123
+    size: 4096
+    type: RSA
     cipher: auto
 
 - name: Generate the Root CA certiciate signing request
@@ -15,12 +17,19 @@
     common_name: "{{ minikubeDomain }}-RootCA"
     country_name: GB
     organization_name: "Cloud Native Toolkit"
+    basic_constraints:
+      - "CA:TRUE"
+    basic_constraints_critical: yes
+    create_subject_key_identifier: yes
     email_address: "admin@{{ minikubeDomain }}"
     key_usage: 
       - cRLSign
       - digitalSignature
       - keyCertSign
       - keyAgreement
+      - dataEncipherment
+      - keyEncipherment
+      - nonRepudiation
     key_usage_critical: yes
 
 - name: Generate rootCA certificate
@@ -29,8 +38,8 @@
     csr_path: "{{ home }}/.minikube/certs/rootCA_crt.csr"
     privatekey_path: "{{ home }}/.minikube/certs/rootCA_key.pem"
     privatekey_passphrase: password123
-    signature_algorithms: "sha512WithRSAEncryption"
     selfsigned_not_after: "+820d"
+    selfsigned_digest: "sha512"
     provider: selfsigned
 
 # Generate Ingress server certificate 
@@ -38,6 +47,8 @@
   community.crypto.openssl_privatekey:
     path: "{{ home }}/.minikube/certs/ingress_key.pem"
     passphrase: password123
+    size: 4096
+    type: RSA
     cipher: auto
 
 - name: Generate an unencrypted private key for kubernetes secret
@@ -71,12 +82,12 @@
     ownca_privatekey_path: "{{ home }}/.minikube/certs/rootCA_key.pem"
     ownca_privatekey_passphrase: password123
     ownca_not_after: "+820d"
-    signature_algorithms: "sha512WithRSAEncryption"
+    ownca_digest: "sha512"
     provider: ownca
 
-- name: Add certificate to OS as trusted root for SSL
+- name: Add RootCA certificate to OS as trusted root for SSL
   command:
-    cmd: "security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain -u 63 -p ssl -p IPSec -p basic -p codeSign {{ home }}/.minikube/certs/rootCA_crt.pem"
+    cmd: "security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain -u 63 -p ssl -p IPSec -p basic -p codeSign -p smime -p eap -p timestamping {{ home }}/.minikube/certs/rootCA_crt.pem"
   become: true
   when:
     "ansible_facts['distribution'] == 'MacOSX'"

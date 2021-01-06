@@ -174,4 +174,4 @@
               app.kubernetes.io/part-of: catalyst
               group: catalyst-tools
           data:
-            TEKTON_URL: 'https://tekton-dashboard.192.168.64.2.nip.io/'
+            TEKTON_URL: 'https://tekton-dashboard.{{ minikubeIP }}.nip.io/'

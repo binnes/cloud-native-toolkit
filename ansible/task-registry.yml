@@ -41,3 +41,5 @@
                       name: registry
                       port:
                         number: 80
+  retries: 5
+  delay: 5

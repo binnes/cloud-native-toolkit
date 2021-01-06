@@ -13,6 +13,14 @@
 - name: Install Che
   command: chectl server:deploy --platform minikube
 
+- name: Add che ingress secret
+  command: kubectl create secret tls {{ secretName }} -n che --cert={{ home }}/.minikube/certs/ingress_crt.pem --key={{ home }}/.minikube/certs/ingress_key_nopass.pem
+  ignore_errors: true
+
+- name: Add rootCA to Che
+  command: kubectl create configmap custom-certs  -n che --from-file={{ home }}/.minikube/certs/rootCA_crt.pem
+  ignore_errors: true
+
 - name: Patch Che to allow multipe workspaces
   community.kubernetes.k8s:
     state: present
@@ -23,6 +31,8 @@
         name: eclipse-che
         namespace: che
       spec: 
-        server: 
+        k8s:
+          tlsSecretName: ingress-tls
+        server:
           customCheProperties: 
             CHE_LIMITS_USER_WORKSPACE_RUN_COUNT: "-1"

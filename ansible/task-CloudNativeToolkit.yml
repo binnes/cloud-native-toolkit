@@ -1,5 +1,18 @@
 ---
 
+- name: Expand templated files
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: 0777
+  with_items:
+      - {src: '{{ home }}/Cn-Tk/ibm-garage-iteration-zero/terraform/stages-minikube/stage2-argocd.tf.j2', 
+        dest: '{{ home }}/Cn-Tk/ibm-garage-iteration-zero/terraform/stages-minikube/stage2-argocd.tf'}
+      - {src: '{{ home }}/Cn-Tk/ibm-garage-iteration-zero/terraform/stages-minikube/stage2-dashboard.tf.j2', 
+        dest: '{{ home }}/Cn-Tk/ibm-garage-iteration-zero/terraform/stages-minikube/stage2-dashboard.tf'}
+      - {src: '{{ home }}/Cn-Tk/ibm-garage-iteration-zero/terraform/stages-minikube/stage2-jenkins.tf.j2', 
+        dest: '{{ home }}/Cn-Tk/ibm-garage-iteration-zero/terraform/stages-minikube/stage2-jenkins.tf'}
+
 - name: Add tls CA cert for Cloud Native Toolkit resources
   command: kubectl create secret generic tls-ca -n default --from-file=${HOME}/.minikube/certs/rootCA_crt.pem
   ignore_errors: true
@@ -28,8 +41,8 @@
 
 - name: Deploy rest of the Cloud Native Toolkit
   community.general.docker_container:
-    name: CNTK-installer
-    image: quay.io/ibmgaragecloud/cli-tools:v0.9.0-lite
+    name: cntk-installer
+    image: quay.io/ibmgaragecloud/cli-tools:v0.10.0-lite
     container_default_behavior: no_defaults
     interactive: yes
     tty: yes
@@ -43,7 +56,9 @@
       TF_VAR_login_user: ""
       TF_VAR_login_password: ""
       TF_VAR_login_token: ""
+      TF_VAR_source_control_url: ""
       TF_VAR_server_url: "https://{{ minikubeIP }}:8443"
+      TF_VAR_ingress_hostname: "{{ minikubeIP }}.nip.io"
       IBMCLOUD_API_KEY: ""
       IAAS_CLASSIC_USERNAME: ""
       IAAS_CLASSIC_API_KEY: ""

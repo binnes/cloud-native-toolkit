@@ -83,8 +83,8 @@
   command:
     chdir: "{{ home }}/Cn-Tk/{{ repoName }}"
     cmd: "git push -u origin {{ repo_branch }}"
-  retries: 5
-  delay: 2
+  retries: 10
+  delay: 5
   register: result
   until: result.rc == 0
   when: 

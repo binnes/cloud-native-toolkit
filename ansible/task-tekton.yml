@@ -30,7 +30,27 @@
 
 - name: Install Tekton Ingress
   community.kubernetes.k8s:
-    src:  ../kubernetes/tekton-ingress.yaml
+    name: tekton-dashboard-ingress
+    namespace: tekton-pipelines
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      spec:
+        tls:
+          - secretName: ingress-tls
+            hosts:
+              - tekton-dashboard.{{ minikubeDomain }}  
+        rules:
+          - host: tekton-dashboard.{{ minikubeDomain }}
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: tekton-dashboard
+                      port:
+                        number: 9097
   
 - name: Add tls CA cert for Tekton
   command: kubectl create secret generic tls-ca -n tekton-pipelines --from-file=${HOME}/.minikube/certs/rootCA_crt.pem

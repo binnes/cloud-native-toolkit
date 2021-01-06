@@ -42,13 +42,62 @@
 - name: Deloy the gitea ingress
   community.kubernetes.k8s:
     state: present
-    src: ../kubernetes/gitea-ingress.yaml
+    name: gitea-ingress
+    namespace: gitea
+    definition:
+      kind: Ingress
+      apiVersion: networking.k8s.io/v1
+      metadata:
+        annotations:
+          nginx.ingress.kubernetes.io/proxy-body-size: '0'
+      #    nginx.ingress.kubernetes.io/rewrite-target: /$1
+      spec:
+        tls:
+          - secretName: ingress-tls
+            hosts:
+              - gitea.{{ minikubeDomain }}
+        rules:
+          - host: gitea.{{ minikubeDomain }}
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: gitea-http
+                      port:
+                        number: 3000
 
 - name: add CA cert to deployment to accept local certs
   community.kubernetes.k8s:
     state: present
     merge_type: merge
-    src: ../kubernetes/gitea-stateful-set-update.yaml
+    name: gitea
+    namespace: gitea
+    definition:
+      kind: StatefulSet
+      apiVersion: apps/v1
+      spec:
+        volumes:
+          - name: ca
+            secret:
+              secretName: tls-ca
+              defaultMode: 420
+        containers:
+          - name: gitea
+            volumeMounts:
+              - name: ca
+                mountPath: /tmp
+            lifecycle:
+              postStart:
+                exec:
+                  command:
+                    - /bin/sh
+                    - '-c'
+                    - >-
+                      cp /tmp/rootCA_crt.pem /usr/local/share/ca-certificates/tls.ca.crt &&
+                      /usr/sbin/update-ca-certificates
+
 
 # Create Gitea user
 # Note first few attempts will fail as gitea takes a little time to start

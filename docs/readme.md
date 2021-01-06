@@ -78,9 +78,8 @@ In Firefox you need to import the certificate.  The certificate is located in th
 
 Minikube runs within a virtual environment on your laptop, so the IP address is not available from outside your system, so by default you need to run on the same machine that minikube is running on.  So launch a browser on the machine and navigate to https://dashboard-tools.<ip address>>.nip.io.  E.g. if ```minikube ip``` returns 192.168.64.2 then the address will be https://dashboard-tools.192.168.64.2.nip.io.  This is the Cloud Native Developer dashboard.  This has links to the applications the Cloud Native Toolkit installed on your cluster.
 
-Note:
-
-- Directories beginning with a . are usually hidden on MacOS.  To see them you can press the **Shift-Command-.** key combination
+!!! Note
+    Directories beginning with a . are usually hidden on MacOS.  To see them you can press the **Shift-Command-.** key combination
 
 ### Gitea setup
 
