@@ -56,7 +56,7 @@
       TF_VAR_login_user: ""
       TF_VAR_login_password: ""
       TF_VAR_login_token: ""
-      TF_VAR_source_control_url: ""
+      TF_VAR_source_control_url: "https://gitea.{{ minikubeIP }}.nip.io/"
       TF_VAR_server_url: "https://{{ minikubeIP }}:8443"
       TF_VAR_ingress_hostname: "{{ minikubeIP }}.nip.io"
       IBMCLOUD_API_KEY: ""
@@ -68,3 +68,37 @@
       - "{{ home }}/.minikube:/home/devops/.minikube"
     working_dir: /home/devops/src
     command: "/home/devops/src/runTerraform.sh -k -a"
+
+- name: Fixup Gitea link in Dashboard
+  community.kubernetes.k8s:
+    state: present
+    merge_type: strategic-merge
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: sourcecontrol-config
+        namespace: tools
+      data:
+        SOURCECONTROL_URL: 'https://gitea.{{ minikubeIP }}.nip.io/'
+
+- name: Add Tekton to Developer Dashboard
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: tekton-config
+        namespace: tools
+        labels:
+          app.kubernetes.io/component: tools
+          app.kubernetes.io/name: tekton-config
+          app.kubernetes.io/part-of: catalyst
+          group: catalyst-tools
+        annotations:
+          description: >-
+            Config map to hold the url for tekton in the environment so that other
+            tools can access it
+      data:
+        TEKTON_URL: 'https://tekton-dashboard.{{ minikubeIP }}.nip.io/'
