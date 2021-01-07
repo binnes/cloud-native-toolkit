@@ -26,7 +26,7 @@
           password: "{{ gitea_admin_password }}"
         config:
           server:
-#            ROOT_URL: "https://gitea.{{ minikubeDomain }}"
+            ROOT_URL: "https://gitea.{{ minikubeDomain }}"
 #            PROTOCOL: "https"
             DOMAIN: "{{ minikubeDomain }}"
             SSH_DOMAIN: "{{ minikubeDomain }}"
@@ -67,37 +67,6 @@
                       name: gitea-http
                       port:
                         number: 3000
-
-- name: add CA cert to deployment to accept local certs
-  community.kubernetes.k8s:
-    state: present
-    merge_type: merge
-    name: gitea
-    namespace: gitea
-    definition:
-      kind: StatefulSet
-      apiVersion: apps/v1
-      spec:
-        volumes:
-          - name: ca
-            secret:
-              secretName: tls-ca
-              defaultMode: 420
-        containers:
-          - name: gitea
-            volumeMounts:
-              - name: ca
-                mountPath: /tmp
-            lifecycle:
-              postStart:
-                exec:
-                  command:
-                    - /bin/sh
-                    - '-c'
-                    - >-
-                      cp /tmp/rootCA_crt.pem /usr/local/share/ca-certificates/tls.ca.crt &&
-                      /usr/sbin/update-ca-certificates
-
 
 # Create Gitea user
 # Note first few attempts will fail as gitea takes a little time to start
@@ -141,6 +110,38 @@
   when:
       "user_req.json | to_json | from_json | json_query(query) == 0"
 
+- name: add CA cert to deployment to accept local certs
+  community.kubernetes.k8s:
+    state: present
+    merge_type: strategic-merge
+    name: gitea
+    namespace: gitea
+    definition:
+      kind: StatefulSet
+      apiVersion: apps/v1
+      spec:
+        template:
+          spec:
+            volumes:
+              - name: ca
+                secret:
+                  secretName: tls-ca
+                  defaultMode: 420
+            containers:
+              - name: gitea
+                volumeMounts:
+                  - name: ca
+                    mountPath: /tmp/certs
+                lifecycle:
+                  postStart:
+                    exec:
+                      command:
+                        - /bin/sh
+                        - '-c'
+                        - >-
+                          cp /tmp/certs/rootCA_crt.pem /usr/local/share/ca-certificates/tls.ca.crt &&
+                          /usr/sbin/update-ca-certificates
+
 # Create Gitea user org
 - name: Get list of Organisations
   uri:
@@ -151,6 +152,9 @@
     method: GET
     validate_certs: no
   register: org_req
+  until: org_req.status == 200
+  delay: 10
+  retries: 24
 
 - name: Create user Organisation if not already exists
   uri:
