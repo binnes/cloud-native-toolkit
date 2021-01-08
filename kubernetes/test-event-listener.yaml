@@ -1,27 +1,14 @@
-apiVersion: triggers.tekton.dev/v1alpha1
-kind: EventListener
-metadata:
-  name: test-listener
-  namespace: dev-bi
-spec:
-  serviceAccountName: pipeline
-  triggers:
-  - bindings:
-    - ref: gitea-pipeline-clusterbinding
-      kind: ClusterTriggerBinding
-    template:
-      ref: test
-
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: r-pipeline
-  namespace: dev-bi
+  namespace: bi-dev
 rules:
 - apiGroups:
   - triggers.tekton.dev
   resources:
+  - triggers
   - eventlisteners
   - triggerbindings
   - triggertemplates
@@ -32,12 +19,14 @@ rules:
   resources:
   - pipelineruns
   - pipelineresources
+  - taskruns
   verbs:
   - create
 - apiGroups:
   - ""
   resources:
   - configmaps
+  - secrets
   verbs:
   - get
   - list
@@ -48,10 +37,11 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: r-pipeline-binding
-  namespace: dev-bi
+  namespace: bi-dev
 subjects:
   - kind: ServiceAccount
     name: pipeline
+    namespace: bi-dev
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -65,8 +55,33 @@ metadata:
 rules:
 # Permissions for every EventListener deployment to function
 - apiGroups: ["triggers.tekton.dev"]
-  resources: ["clustertriggerbindings"]
-  verbs: ["get", "list", "watch"]
+  resources: 
+  - clustertriggerbindings
+  - eventlisteners
+  - triggerbindings
+  - triggertemplates
+  - triggers
+  verbs: 
+  - get
+  - list
+  - watch
+- apiGroups:
+  - tekton.dev
+  resources:
+  - pipelineruns
+  - pipelineresources
+  - taskruns
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -76,8 +91,23 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: pipeline
-    namespace: dev-bi
+    namespace: bi-dev
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: cr-pipeline
+
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: test-listener
+  namespace: bi-dev
+spec:
+  serviceAccountName: pipeline
+  triggers:
+  - bindings:
+    - ref: gitea-pipeline-clusterbinding
+      kind: ClusterTriggerBinding
+    template:
+      ref: stockbffnode
