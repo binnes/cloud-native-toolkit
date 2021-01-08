@@ -23,13 +23,13 @@ metadata:
     app.kubernetes.io/name: cloud
     group: catalyst-tools
 data:
-  REGISTRY_URL: 192.168.64.2:5000
+  REGISTRY_URL: registry.172.16.171.2.nip.io
   RESOURCE_GROUP: ''
   CLUSTER_NAME: 'minikube'
-  SERVER_URL: 'https://192.168.64.2:8443'
+  SERVER_URL: 'https://172.16.171.2.nip.io:8443'
   REGION: ''
-  APIURL: 'https://192.168.64.2:8443'
-  TLS_SECRET_NAME: '192-168-64-2-nip-io-tls'
+  APIURL: 'https://172.16.171.2.nip.io:8443'
+  TLS_SECRET_NAME: 'ingress-tls'
   REGISTRY_NAMESPACE: ''
-  INGRESS_SUBDOMAIN: 192.168.64.2.nip.io
+  INGRESS_SUBDOMAIN: 172.16.171.2.nip.io
   CLUSTER_TYPE: kubernetes

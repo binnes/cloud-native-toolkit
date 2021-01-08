@@ -1,0 +1,16 @@
+kind: Secret
+apiVersion: v1
+metadata:
+  name: registry-access
+  namespace: tools
+  labels:
+    app: registry
+    grouping: garage-cloud-native-toolkit
+    app.kubernetes.io/component: registry
+    app.kubernetes.io/name: registry
+    group: catalyst-tools
+type: opaque
+stringData:
+  REGISTRY_URL: 'registry.172.16.171.2.nip.io'
+  REGISTRY_NAMESPACE: 'demo'
+ 
