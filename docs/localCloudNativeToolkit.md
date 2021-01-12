@@ -1,14 +1,14 @@
 # Where to run the Cloud Native Toolkit
 
-The [Cloud Native Toolkit](https://cloudnativetoolkit.dev) is run within [Open Shift running on the IBM Cloud](https://www.ibm.com/cloud/openshift), however this is not always ideal for learning.  Sometime a developer wants a local option, where everything can run on their own hardware, maybe where connectivity isn't always guaranteed.  There are other times where a developer may want to dig a little deeper, so wants an isolated environment, where they can experiment without fear of breaking other members of their team, so again want an isolated environment where they have admin permissions.
+The [Cloud Native Toolkit](https://cloudnativetoolkit.dev) is typically run within [Open Shift running on the IBM Cloud](https://www.ibm.com/cloud/openshift), however this is not always ideal for learning.  Sometime a developer wants a local option, where everything can run on their own hardware, maybe where connectivity isn't always guaranteed.  There are other times where a developer may want to dig a little deeper, so wants an isolated environment, where they can experiment without fear of breaking other members of their team, so again want an isolated environment where they have admin permissions.
 
 Having access to a longer term, no cost environment can also give a developer time to do deeper learning
 
-This is why this project exists.  To take the Cloud Native toolkit and allow it to be run in an isolated environment with lower resources than would typically be needed in a cloud environment.
+This is why this project exists.  To take the Cloud Native toolkit and allow it to be run in an isolated environment with lower resources than would typically be available in a cloud environment.
 
 ## Low Resources environment
 
-One of the challenges of working off-line with a private cloud is that the software stack is designed to run in a cloud environment, where resources are more abundant, and typically designed to serve a large user population.  This can make it challenging to replicate on a laptop or developer workstation.
+One of the challenges of working with a local install is that the software stack is designed to run in a cloud environment, where resources are more abundant, and typically designed to serve a large user population.  This can make it challenging to replicate on a laptop or developer workstation.
 
 There are also capabilities which are assumed in a cloud environment, which may not exist when running locally, such as inbound connectivity.
 
