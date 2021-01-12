@@ -1,0 +1,31 @@
+site_name: Local Cloud Native Toolkit
+site_description: >-
+  Running the Cloud Native Toolkit locally
+site_url: https://binnes.github.io/cloud-native-toolkit/
+site_author: Brian Innes
+repo_name: binnes/cloud-native-toolkit
+repo_url: https://github.com/binnes/cloud-native-toolkit
+theme:
+    name: material
+use_directory_urls: false
+plugins:
+  - search
+  - with-pdf:
+      cover_subtitle: setup the Cloud Native Toolkit on a local machine
+      output_path: pdf/LocalCloudNativeToolkit.pdf
+markdown_extensions:
+  - attr_list
+  - admonition
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.superfences
+  - pymdownx.highlight
+extra_css:
+    - css/extra.css
+    - css/pdf-print.css
+nav:
+  - Home: index.md
+  - Local cluster : localCloudNativeToolkit.md
+  - Day1 differences : day1.md
+google_analytics: ['UA-172132667-1', 'binnes.github.io/cloud-native-toolkit']

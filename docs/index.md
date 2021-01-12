@@ -1,4 +1,4 @@
-# Cloud Native Toolkit
+# Local Cloud Native Toolkit
 
 This repo is based on the [Cloud Native Toolkit](https://cloudnativetoolkit.dev).  The content of this repository extend the toolkit to run on a pure open source stack, based on minikube.
 
