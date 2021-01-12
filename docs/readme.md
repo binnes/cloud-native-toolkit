@@ -34,7 +34,7 @@ brew install minikube
 
 To create the minikube cluster, run the following command, adjusting the CPU and memory settings to match your configuration.  You want to give the stack as much memory as possible to get good working performance.
 
-minikube start --addons=dashboard --addons=ingress --addons=olm --addons=metrics-server --addons=istio-provisioner --addons=istio --cpus=8 --disk-size=250g --memory=48g --embed-certs --driver hyperkit --insecure-registry 192.168.64.2:5000
+minikube start --addons=dashboard --addons=ingress --addons=olm --addons=metrics-server --addons=istio-provisioner --addons=istio --cpus=8 --disk-size=100g --memory=12g --embed-certs --driver hyperkit --insecure-registry 192.168.64.2:5000
 
 Bring up the dashboard with command ```minikube dashboard &```, switch to **All namespaces** and then highlight **Workloads** in the side menu.  
 
