@@ -33,11 +33,15 @@ Running the environment locally does pose some challenges to deliver a good deve
 
 ### DNS - Name resolution
 
-When you deploy workloads on a cloud your browser and clients of the workloads need to be able to reach the workloads.  Facilities like the Ingress controller within the cloud infrastructure will route traffic within the cloud, but a browser still needs to be able to get to the cloud.  On the public cloud the Internet DNS service manages this, but such services are not available when running locally, unless you setup and configure your own DNS server.
+When you deploy workloads on a cloud your browser and clients of the workloads need to be able to reach the workloads.  Facilities like the Ingress controller within the cloud infrastructure will route traffic within the cloud, but a browser still needs to be able to get to the cloud.  With public cloud hosted services, the Internet DNS service enables name resolution to an IP address, but such services are not available for local kubernetes clusters, unless you setup and configure your own DNS server or manually configure mappings for all services on your workstation.
 
-To overcome this issue the [**nip.io**](https://nip.io) is used by the project.  This does require an outbound internet connection to work, but solves name resolution issues for workloads deployed to a local cloud infrastructure.  The service works by including the IP address in the URL.  Service URLs need to be in the form of <service name>.<ip address>.nip.io and they will resolve the to IP address included in the URL.  This project sets the cluster domain to <minikube ip address>.nip.io, so all ingress hostnames will have a valid nip.io format.
+To overcome this issue the [**nip.io**](https://nip.io) name resolution service is used by the project.  This does require an outbound internet connection to work, but solves name resolution issues for workloads deployed to a local kubrnetes cluster.  
 
-If you need to run in a disconnected environment then a DNS server, such as **dnsmasq** needs to be installed and configured in the local network.
+The service works by including the cluster IP address in the URL.  Service URLs need to be in the form of <service name>.<ip address>.nip.io and they will resolve the to IP address included in the URL.  
+
+This project sets the cluster domain to <minikube ip address>.nip.io, so all ingress hostnames will have a valid nip.io format and all will resolve to the kubernetes IP address.
+
+If you need to run in a disconnected environment then a DNS server, such as **dnsmasq** needs to be installed and configured in your local network/workstation.
 
 !!! note
     This is on the todo list to provide instructions to implement local DNS
@@ -54,4 +58,8 @@ This approach works for disconnected or connected working, once the CA root publ
 
 ### Inbound connectivity to trigger pipelines
 
-The Cloud Native Toolkit relies heavily on the source control system, usually github.  However, part of the workflow requires git hooks to fire and initiate actions within the development environment.  When running on public cloud infrastructure github.com is able to connect with the required services running the developer workflow, but in a local environment this is not possible.  To provide the integrated developer workflow this project installs a private git service on the cluster, so git hooks can be configured to initiate workflows within the local cluster.  The current choice of private git service is [Gitea](https://gitea.io), but the Cloud Native Toolkit has just added support for [Gogs](https://gogs.io), so it may be preferable to adopt that in the future?
+The Cloud Native Toolkit relies heavily on the source control system, usually github.  However, part of the workflow requires git hooks to fire and initiate actions within the development environment.  When running on public cloud infrastructure github.com is able to connect with the required services running the developer workflow, but in a local environment this is not possible.  
+
+To provide the integrated developer workflow this project installs a private git service on the cluster, so git hooks can be configured to initiate workflows within the local cluster.  
+
+The current choice of private git service is [Gitea](https://gitea.io), but the Cloud Native Toolkit has just added support for [Gogs](https://gogs.io), so it may be preferable to adopt that in the future?
