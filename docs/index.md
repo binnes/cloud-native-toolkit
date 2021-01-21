@@ -15,17 +15,32 @@ This content will currently only run on systmes capable of running AMD64 archite
 - Minikube
 - Git Client
 - python and pip also need to be installed on the system
-- MacOS:
-  - working xcode install with additional command line tools (```xcode-select --install```)
+- Basic developer tools, to build native components in packages:
+  - MacOS : working xcode install with additional command line tools (```xcode-select --install```)
+  - Linux : ```sudo apt install -y build-essential```
+- Command line tools, kubectl, helm
+    - Linux Ubuntu : ```sudo  snap install --classic helm```
 
 
 ## Setup instructions
+install Docker
+    - Ubuntu Linus instructions - 
+        ```shell
+            snap install docker
+            sudo groupadd docker
+            sudo usermod -aG docker $USER
+            sudo reboot -n
+        ```
+
+install ansible, git, python, pip
+    - Ubuntu - ```sudo apt-get install -y ansible, python3-pip```
 
 install minikube
+    - mac instructions - ```brew install minikube```
+    - [Ubuntu linux instructions](https://www.server-world.info/en/note?os=Ubuntu_20.04&p=minikube&f=1)
 
-instructions [here](https://minikube.sigs.k8s.io/docs/start/)
+Additional information [here](https://minikube.sigs.k8s.io/docs/start/)
 
-brew install minikube
 
 !!!Info
     Ideally you want to know the IP address your cluster will be assigned before it is created.  On MacOS using hyperkit you can do this by looking at file /var/db/dhcpd_leases.  Your machine will be allocated the next available IP address.  If the file does not exist or is empty then you will be assigned the first available address on the subnet created for the driver used (hyperkit in the example command below).
@@ -34,7 +49,9 @@ brew install minikube
 
 To create the minikube cluster, run the following command, adjusting the CPU and memory settings to match your configuration.  You want to give the stack as much memory as possible to get good working performance.
 
-minikube start --addons=dashboard --addons=ingress --addons=olm --addons=metrics-server --addons=istio-provisioner --addons=istio --cpus=8 --disk-size=100g --memory=12g --embed-certs --driver hyperkit --insecure-registry 192.168.64.2:5000
+Start minikube.  The commands below are recommended minimum resource values.  If you have a larger machine you may want to increase CPUs, memory or disk to provide additional resources to minikube:
+    mac : ```minikube start --addons=dashboard --addons=ingress --addons=olm --addons=metrics-server --addons=istio-provisioner --addons=istio --cpus=4 --disk-size=50g --memory=12g --embed-certs --driver hyperkit --insecure-registry 192.168.64.2:5000```
+    linux : ```minikube start --addons=dashboard --addons=ingress --addons=olm --addons=metrics-server --addons=istio-provisioner --addons=istio --cpus=4 --disk-size=50g --memory=12g --embed-certs --driver kvm2 --insecure-registry 192.168.64.2:5000```
 
 Bring up the dashboard with command ```minikube dashboard &```, switch to **All namespaces** and then highlight **Workloads** in the side menu.  
 
@@ -61,10 +78,14 @@ In a command window:
 
 - clone this git repository: ```git clone https://github.com/binnes/cloud-native-toolkit.git```
 - change into the ansible directory: ```cd cloud-native-toolkit/ansible```
-- ensure required packages are installed ```pip install cryptography```
+- ensure required packages are installed ```pip3 install cryptography```
+- install kubernetes collection ```ansible-galaxy collection install community.kubernetes```
+- install crypto collection ```ansible-galaxy collection install community.crypto```
+- install general collection - for docker ```ansible-galaxy collection install community.general```
 - run the playbook: ```ansible-playbook --ask-become-pass minicube-playbook.yml```
   - You will be prompted for your user password - this is because some configuration options need admin privileges
 
+At some point you will be prompted for git credentials for the deployed Gitea server.  The username and password are defined in the vars.yml file to be demo/dem0P4s$.  You can change these if desired.
 
 ## Post install steps
 

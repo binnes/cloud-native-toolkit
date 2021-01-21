@@ -11,7 +11,7 @@
   become: true
 
 - name: Install Che
-  command: chectl server:deploy --platform minikube
+  command: chectl server:deploy --platform minikube --telemetry=off -n che
 
 - name: Add che ingress secret
   command: kubectl create secret tls {{ secretName }} -n che --cert={{ home }}/.minikube/certs/ingress_crt.pem --key={{ home }}/.minikube/certs/ingress_key_nopass.pem

@@ -85,12 +85,19 @@
     ownca_digest: "sha512"
     provider: ownca
 
-- name: Add RootCA certificate to OS as trusted root for SSL
+- name: Add RootCA certificate to Mac OS as trusted root for SSL
   command:
     cmd: "security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain -u 63 -p ssl -p IPSec -p basic -p codeSign -p smime -p eap -p timestamping {{ home }}/.minikube/certs/rootCA_crt.pem"
   become: true
   when:
     "ansible_facts['distribution'] == 'MacOSX'"
+
+- name: Add RootCA certificate to Ubuntu as trusted root for SSL
+  ansible.builtin.shell:
+    cmd: "openssl x509 -outform der -in {{ home }}/.minikube/certs/rootCA_crt.pem -out /usr/local/share/ca-certificates/rootCA.crt && update-ca-certificates"
+  become: true
+  when:
+    "ansible_facts['distribution'] == 'Ubuntu'"
 
 - name: Update certificates Ingress uses to the newly generated cert
   shell:
