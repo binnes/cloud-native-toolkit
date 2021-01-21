@@ -39,10 +39,17 @@
     force_kill: yes
     state: absent
 
+- name: Set file permissions for kube config
+  ansible.builtin.file:
+    path: "{{ home }}/.kube/config"
+    mode: '0644'
+  when:
+    "ansible_facts['distribution'] == 'Ubuntu'"
+
 - name: Deploy rest of the Cloud Native Toolkit
   community.general.docker_container:
     name: cntk-installer
-    image: quay.io/ibmgaragecloud/cli-tools:v0.10.0-lite
+    image: quay.io/ibmgaragecloud/cli-tools:v0.9.0-lite
     container_default_behavior: no_defaults
     interactive: yes
     tty: yes
@@ -68,6 +75,13 @@
       - "{{ home }}/.minikube:/home/devops/.minikube"
     working_dir: /home/devops/src
     command: "/home/devops/src/runTerraform.sh -k -a"
+
+- name: Restore file permissions for kube config
+  ansible.builtin.file:
+    path: "{{ home }}/.kube/config"
+    mode: '0600'
+  when:
+    "ansible_facts['distribution'] == 'Ubuntu'"
 
 - name: Fixup Gitea link in Dashboard
   community.kubernetes.k8s:
