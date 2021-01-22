@@ -22,7 +22,7 @@ The minimum environment run on top of Minikube rather than OpenShift, as Minikub
 
 ### Enhanced Environment
 
-A better developer experience can be obtained where a laptop of developer workstation has more memory available, 24GB or greater.  This can then use [Code Ready Containers - crc](https://developers.redhat.com/products/codeready-containers/overview) or the [Open Source comunity distribution based version - okd](https://www.okd.io/crc.html)
+A better developer experience can be obtained where a laptop of developer workstation has more memory available, 24GB or greater.  This can then use [Code Ready Containers - crc](https://developers.redhat.com/products/codeready-containers/overview) or the [Open Source community distribution based version - okd](https://www.okd.io/crc.html)
 
 !!! Note
     Use the [Cloud Native Toolkit](https://cloudnativetoolkit.dev) instructions to setup this environment.  The project has not yet created the assets to install a stand-alone version of the toolkit based on OpenShift (crc/okd).
@@ -37,9 +37,9 @@ When you deploy workloads on a cloud your browser and clients of the workloads n
 
 To overcome this issue the [**nip.io**](https://nip.io) name resolution service is used by the project.  This does require an outbound internet connection to work, but solves name resolution issues for workloads deployed to a local kubrnetes cluster.  
 
-The service works by including the cluster IP address in the URL.  Service URLs need to be in the form of <service name>.<ip address>.nip.io and they will resolve the to IP address included in the URL.  
+The service works by including the cluster IP address in the URL.  Service URLs need to be in the form of [service name].[ip address].nip.io and they will resolve the to IP address included in the URL.  
 
-This project sets the cluster domain to <minikube ip address>.nip.io, so all ingress hostnames will have a valid nip.io format and all will resolve to the kubernetes IP address.
+This project sets the cluster domain to [minikube ip address].nip.io, so all ingress hostnames will have a valid nip.io format and all will resolve to the kubernetes IP address.
 
 If you need to run in a disconnected environment then a DNS server, such as **dnsmasq** needs to be installed and configured in your local network/workstation.
 
@@ -52,7 +52,7 @@ Secure communication is provided by TLS based on certificates and a set of trust
 
 With a local setup it is not always possible to set this up and where it is possible it is often not trivial.  Having to use a traffic forwarding service, dynamic DNS forwarder, etc.  then having to configure your service provider router or modem to forward traffic within your local network.  If working at a hotspot or with certain internet service providers it is not possible to accept inbound traffic, so an alternate solution is needed to provide SSL/TLS certificates.
 
-This project creates a self-signed root Certificate Authority (CA) certificate, then issues a wildcard server certificate to the cluster *.<minikube IP address>.nip.io, which is signed by the self-signed root CA certificate.  You need to add and trust the public certificate of the self-signed root CA to your OS/browser then all services offered by the local cluster will be trusted and you won't receive any browser warnings.  Any application or services that need to access a cluster service will also need to have the root CA public certificate added to their host OS to allow them to communicate securely without reporting certificate authorisation errors.
+This project creates a self-signed root Certificate Authority (CA) certificate, then issues a wildcard server certificate to the cluster *[minikube IP address].nip.io, which is signed by the self-signed root CA certificate.  You need to add and trust the public certificate of the self-signed root CA to your OS/browser then all services offered by the local cluster will be trusted and you won't receive any browser warnings.  Any application or services that need to access a cluster service will also need to have the root CA public certificate added to their host OS to allow them to communicate securely without reporting certificate authorisation errors.
 
 This approach works for disconnected or connected working, once the CA root public certificate is trusted.
 

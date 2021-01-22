@@ -6,9 +6,9 @@ NOTE:  THIS REPOSITORY IS STILL A WORK IN PROGRESS
 
 ## Prerequisites
 
-Currently only tested on an Intel based Mac with 16GB of memory or more
+Currently only tested on an Intel based Mac/Linux(Ubuntu) with 16GB of memory or more
 
-This content will currently only run on systmes capable of running AMD64 architecture containers, as many of the components are only provided in this architecture
+This content will currently only run on systems capable of running AMD64 architecture containers, as many of the components are only provided in this architecture
 
 - Docker
 - Ansible
@@ -19,12 +19,12 @@ This content will currently only run on systmes capable of running AMD64 archite
   - MacOS : working xcode install with additional command line tools (```xcode-select --install```)
   - Linux : ```sudo apt install -y build-essential```
 - Command line tools, kubectl, helm
-    - Linux Ubuntu : ```sudo  snap install --classic helm```
-
+  - Linux Ubuntu : ```sudo  snap install --classic helm```
 
 ## Setup instructions
+
 install Docker
-    - Ubuntu Linus instructions - 
+    - Ubuntu Linus instructions -
         ```shell
             snap install docker
             sudo groupadd docker
@@ -41,7 +41,6 @@ install minikube
 
 Additional information [here](https://minikube.sigs.k8s.io/docs/start/)
 
-
 !!!Info
     Ideally you want to know the IP address your cluster will be assigned before it is created.  On MacOS using hyperkit you can do this by looking at file /var/db/dhcpd_leases.  Your machine will be allocated the next available IP address.  If the file does not exist or is empty then you will be assigned the first available address on the subnet created for the driver used (hyperkit in the example command below).
 
@@ -55,7 +54,7 @@ Start minikube.  The commands below are recommended minimum resource values.  If
 
 Bring up the dashboard with command ```minikube dashboard &```, switch to **All namespaces** and then highlight **Workloads** in the side menu.  
 
-Wait until all Deployments are complete (Workload staus Deployments circle is all geen) before continuing.
+Wait until all Deployments are complete (Workload status Deployments circle is all green) before continuing.
 
 ### Fix up insecure registry and domain
 
@@ -91,13 +90,17 @@ At some point you will be prompted for git credentials for the deployed Gitea se
 
 A self-signed root certificate has been generated and used to create the ingress TLS certificate.  This needs to be trusted by your browser to be able to access the various applications.
 
-The setup script installs the rootCA certificate to the Mac OS keychain, but the command line tool doesn't appear to setup the trust settings correctly.  Go into the Keychain app (found in Applications -> Utilities).  Select the System keychain and Certificates section.  Find the certificate - named <IP address>.nip.io-RootCA.  Change the trust settings to Never Trust, then change back to Always Trust.  When you close the window you should b prompted for your user password, showing that the change has been registered.  This cetificate will now be trusted by Safari and Chrome.
+The setup script installs the rootCA certificate to the Mac OS keychain, but the command line tool doesn't appear to setup the trust settings correctly.  Go into the Keychain app (found in Applications -> Utilities).  Select the System keychain and Certificates section.  Find the certificate - named *[IP address]*.nip.io-RootCA.  Change the trust settings to Never Trust, then change back to Always Trust.  When you close the window you should b prompted for your user password, showing that the change has been registered.  This certificate will now be trusted by Safari and Chrome.
 
 In Firefox you need to import the certificate.  The certificate is located in the .minikube/certs folder within your home folder. (~/.minikube/certs) in a file named rootCA_crt.pem.  In Firefox open the Preferences, then select the Privacy & Security settings.  Scroll down until you see the certificates section then press the View Certificates button.  In the Certificate Manager popup window select the Authorities section then Import... Navigate to the .minikube/certs directory within your home directory and select the rootCA_rt.pem file to import.  Select both checkboxes then hit OK to import the certificate.
 
 ## Accessing the applications
 
-Minikube runs within a virtual environment on your laptop, so the IP address is not available from outside your system, so by default you need to run on the same machine that minikube is running on.  So launch a browser on the machine and navigate to https://dashboard-tools.<ip address>>.nip.io.  E.g. if ```minikube ip``` returns 192.168.64.2 then the address will be https://dashboard-tools.192.168.64.2.nip.io.  This is the Cloud Native Developer dashboard.  This has links to the applications the Cloud Native Toolkit installed on your cluster.
+Minikube runs within a virtual environment on your laptop, so the IP address is not available from outside your system, so by default you need to run on the same machine that minikube is running on.  So launch a browser on the machine and navigate to ```https://dashboard-tools.[ip address].nip.io```.  
+
+    E.g. if ```minikube ip``` returns 192.168.64.2 then the address will be https://dashboard-tools.192.168.64.2.nip.io.  
+    
+    This is the Cloud Native Developer dashboard.  This has links to the applications the Cloud Native Toolkit installed on your cluster.
 
 !!! Note
     Directories beginning with a . are usually hidden on MacOS.  To see them you can press the **Shift-Command-.** key combination
@@ -106,23 +109,23 @@ Minikube runs within a virtual environment on your laptop, so the IP address is 
 
 !!!Info
     If you want to log onto Gitea as an administrator, look in the gitea-init secret in the gitea namespace.  There you will see the credentials for the admin user: the username is gitea_admin and the password is also visible.  
-    
+
     If you create your own user you can use the admin login to go into the site admin section and promote your user to an administrator.
 
 - Register a new account
 - Sign into new account
 - Goto settings, then Applications, then Generate Token - copy it and don't loose it
-    - pipeline : 1dfb4040dd49269740926a512727dbc474fac90b
+  - pipeline : 1dfb4040dd49269740926a512727dbc474fac90b
 
 ### Setup che
 
 The default user name and password is admin / admin> - need to change password at first login and don't forget what the new admin password is.
 
-<todo - how to create new user account in keycloak>
+*[todo - how to create new user account in keycloak]*
 
 ## Useful commands
 
-### Remove all completed pods (sucessful or failed)
+### Remove all completed pods (successful or failed)
 
 ```kubectl get pods --all-namespaces -o wide | egrep -i 'Error|Completed' | awk '{print $2 " --namespace=" $1}' | xargs kubectl delete pod --force=true --wait=false --grace-period=0```
 
