@@ -26,6 +26,7 @@ extra_css:
     - css/pdf-print.css
 nav:
   - Home: index.md
+  - Target environment : WhereToRun.md
   - Local cluster : localCloudNativeToolkit.md
   - Day1 differences : day1.md
 google_analytics: ['UA-172132667-1', 'binnes.github.io/cloud-native-toolkit']

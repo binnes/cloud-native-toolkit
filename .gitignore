@@ -1,3 +1,4 @@
 collections
 *.log
 .DS_Store
+*.pptx
