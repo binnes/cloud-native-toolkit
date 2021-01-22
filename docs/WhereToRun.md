@@ -35,8 +35,9 @@ It is possible to run the cloud native toolkit on a laptop and work through the 
 - [OKD](https://okd.io) is the upstream, open source version of OpenShift.  It can be run on a number of platforms, including a cut down single host option and a version of [Code Ready Containers](https://www.okd.io/crc.html) available on OKD, which is a cut-down, single host install.
 - [Code Ready Containers (CRC)](https://developers.redhat.com/products/codeready-containers/overview) is a version of OpenShift that is specifically intended to allow developers to have access to a local Open Shift environment.  It is bundled as a single virtual machine that runs on the developer laptop and it can run on a 16GB machine, but once additional development tooling is installed and developer activity starts within the CRC environment you quickly run into resource issues, so additional memory is recommended.
 
-  !!!Warning
-      There is currently an issue with the disk resize option on MacOS.  The default disk size is sufficient to run OpenShift, but not sufficient to install additional tooling and perform development work within the Open Shift environment.
+!!!Warning
+    There is currently an issue with the disk resize option on MacOS.  The default disk size is sufficient to run OpenShift, but not sufficient to install additional tooling and perform development work within the Open Shift environment.
+
 - [Minikube](https://minikube.sigs.k8s.io/docs/) provides a single node, standard Kubernetes installation using minimal system resources, so is ideal for a local kubernetes environment on a laptop.  This project extends the [Cloud Native Toolkit](https://cloudnativetoolkit.dev) project to support Minikube as a target install environment.  The downside to Minikube is that is is a base Kubernetes install, so the enhanced OpenShift environment is not available to developers, but all the Open Source tooling is still available and many of the integrated features available in OpenShift have an upstream open source project, such as Tekton is the base technology for OpenShift pipelines and Che/Theia is the base technology for Code Ready Workspaces.
 
 There are also some additional considerations when looking at an Air Gapped or local laptop/workstation install, which are discussed [here](localCloudNativeToolkit.md)
