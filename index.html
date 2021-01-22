@@ -1,0 +1,507 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Running the Cloud Native Toolkit locally" name="description"/>
+<meta content="Brian Innes" name="author"/>
+<link href="https://binnes.github.io/cloud-native-toolkit/index.html" rel="canonical"/>
+<link href="assets/images/favicon.png" rel="shortcut icon"/>
+<meta content="mkdocs-1.1.2, mkdocs-material-6.2.5" name="generator"/>
+<title>Home - Local Cloud Native Toolkit</title>
+<link href="assets/stylesheets/main.15aa0b43.min.css" rel="stylesheet"/>
+<link href="assets/stylesheets/palette.75751829.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&amp;display=fallback" rel="stylesheet"/>
+<style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
+<link href="css/extra.css" rel="stylesheet"/>
+<link href="css/pdf-print.css" rel="stylesheet"/>
+<script>window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)},ga.l=+new Date,ga("create","UA-172132667-1","binnes.github.io/cloud-native-toolkit"),ga("set","anonymizeIp",!0),ga("send","pageview"),document.addEventListener("DOMContentLoaded",function(){document.forms.search&&document.forms.search.query.addEventListener("blur",function(){if(this.value){var e=document.location.pathname;ga("send","pageview",e+"?q="+this.value)}})}),document.addEventListener("DOMContentSwitch",function(){ga("send","pageview",document.location.pathname)})</script>
+<script async="" src="https://www.google-analytics.com/analytics.js"></script>
+</head>
+<body data-md-color-accent="none" data-md-color-primary="none" data-md-color-scheme="" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#local-cloud-native-toolkit">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header-nav md-grid">
+<a aria-label="Local Cloud Native Toolkit" class="md-header-nav__button md-logo" href="https://binnes.github.io/cloud-native-toolkit/" title="Local Cloud Native Toolkit">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"></path></svg>
+</a>
+<label class="md-header-nav__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"></path></svg>
+</label>
+<div class="md-header-nav__title" data-md-component="header-title">
+<div class="md-header-nav__ellipsis">
+<div class="md-header-nav__topic">
+<span class="md-ellipsis">
+            Local Cloud Native Toolkit
+          </span>
+</div>
+<div class="md-header-nav__topic">
+<span class="md-ellipsis">
+            
+              Home
+            
+          </span>
+</div>
+</div>
+</div>
+<label class="md-header-nav__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" data-md-state="active" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
+</label>
+<button aria-label="Clear" class="md-search__icon md-icon" data-md-component="search-reset" tabindex="-1" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"></path></svg>
+</button>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header-nav__source">
+<a class="md-source" href="https://github.com/binnes/cloud-native-toolkit/" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"></path></svg>
+</div>
+<div class="md-source__repository">
+    binnes/cloud-native-toolkit
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="Local Cloud Native Toolkit" class="md-nav__button md-logo" href="https://binnes.github.io/cloud-native-toolkit/" title="Local Cloud Native Toolkit">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"></path></svg>
+</a>
+    Local Cloud Native Toolkit
+  </label>
+<div class="md-nav__source">
+<a class="md-source" href="https://github.com/binnes/cloud-native-toolkit/" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"></path></svg>
+</div>
+<div class="md-source__repository">
+    binnes/cloud-native-toolkit
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" data-md-toggle="toc" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+          Home
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="index.html">
+        Home
+      </a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#prerequisites">
+    Prerequisites
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#setup-instructions">
+    Setup instructions
+  </a>
+<nav aria-label="Setup instructions" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#start-the-kubernetes-cluster">
+    Start the Kubernetes cluster
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#fix-up-insecure-registry-and-domain">
+    Fix up insecure registry and domain
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#run-the-ansible-installer-to-complete-the-setup">
+    Run the ansible installer to complete the setup
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#post-install-steps">
+    Post install steps
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#accessing-the-applications">
+    Accessing the applications
+  </a>
+<nav aria-label="Accessing the applications" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#gitea-setup">
+    Gitea setup
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#setup-che">
+    Setup che
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#useful-commands">
+    Useful commands
+  </a>
+<nav aria-label="Useful commands" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#remove-all-completed-pods-successful-or-failed">
+    Remove all completed pods (successful or failed)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#manually-run-the-terraform-scripts">
+    manually run the terraform scripts
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#install-and-run-local-toolkit">
+    Install and run local toolkit
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#to-remove-all">
+    to remove all
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="WhereToRun.html">
+        Target environment
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="localCloudNativeToolkit.html">
+        Local cluster
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="day1.html">
+        Day1 differences
+      </a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#prerequisites">
+    Prerequisites
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#setup-instructions">
+    Setup instructions
+  </a>
+<nav aria-label="Setup instructions" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#start-the-kubernetes-cluster">
+    Start the Kubernetes cluster
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#fix-up-insecure-registry-and-domain">
+    Fix up insecure registry and domain
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#run-the-ansible-installer-to-complete-the-setup">
+    Run the ansible installer to complete the setup
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#post-install-steps">
+    Post install steps
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#accessing-the-applications">
+    Accessing the applications
+  </a>
+<nav aria-label="Accessing the applications" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#gitea-setup">
+    Gitea setup
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#setup-che">
+    Setup che
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#useful-commands">
+    Useful commands
+  </a>
+<nav aria-label="Useful commands" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#remove-all-completed-pods-successful-or-failed">
+    Remove all completed pods (successful or failed)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#manually-run-the-terraform-scripts">
+    manually run the terraform scripts
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#install-and-run-local-toolkit">
+    Install and run local toolkit
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#to-remove-all">
+    to remove all
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content">
+<article class="md-content__inner md-typeset">
+<a class="md-content__button md-icon" href="https://github.com/binnes/cloud-native-toolkit/edit/master/docs/index.md" title="Edit this page">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"></path></svg>
+</a>
+<h1 id="local-cloud-native-toolkit">Local Cloud Native Toolkit<a class="headerlink" href="#local-cloud-native-toolkit" title="Permanent link">¶</a></h1>
+<p>This repo is based on the <a href="https://cloudnativetoolkit.dev">Cloud Native Toolkit</a>.  The content of this repository extend the toolkit to run on a pure open source stack, based on minikube.</p>
+<p>NOTE:  THIS REPOSITORY IS STILL A WORK IN PROGRESS</p>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">¶</a></h2>
+<p>Currently only tested on an Intel based Mac/Linux(Ubuntu) with 16GB of memory or more</p>
+<p>This content will currently only run on systems capable of running AMD64 architecture containers, as many of the components are only provided in this architecture</p>
+<ul>
+<li>Docker</li>
+<li>Ansible</li>
+<li>Minikube</li>
+<li>Git Client</li>
+<li>python and pip also need to be installed on the system</li>
+<li>Basic developer tools, to build native components in packages:</li>
+<li>MacOS : working xcode install with additional command line tools (<code>xcode-select --install</code>)</li>
+<li>Linux : <code>sudo apt install -y build-essential</code></li>
+<li>Command line tools, kubectl, helm</li>
+<li>Linux Ubuntu : <code>sudo  snap install --classic helm</code></li>
+</ul>
+<h2 id="setup-instructions">Setup instructions<a class="headerlink" href="#setup-instructions" title="Permanent link">¶</a></h2>
+<p>install Docker
+    - Ubuntu Linus instructions -
+        <div class="highlight"><pre><span></span><code>    snap install docker
+    sudo groupadd docker
+    sudo usermod -aG docker <span class="nv">$USER</span>
+    sudo reboot -n
+</code></pre></div></p>
+<p>install ansible, git, python, pip
+    - Ubuntu - <code>sudo apt-get install -y ansible, python3-pip</code></p>
+<p>install minikube
+    - mac instructions - <code>brew install minikube</code>
+    - <a href="https://www.server-world.info/en/note?os=Ubuntu_20.04&amp;p=minikube&amp;f=1">Ubuntu linux instructions</a></p>
+<p>Additional information <a href="https://minikube.sigs.k8s.io/docs/start/">here</a></p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>Ideally you want to know the IP address your cluster will be assigned before it is created.  On MacOS using hyperkit you can do this by looking at file /var/db/dhcpd_leases.  Your machine will be allocated the next available IP address.  If the file does not exist or is empty then you will be assigned the first available address on the subnet created for the driver used (hyperkit in the example command below).</p>
+</div>
+<h3 id="start-the-kubernetes-cluster">Start the Kubernetes cluster<a class="headerlink" href="#start-the-kubernetes-cluster" title="Permanent link">¶</a></h3>
+<p>To create the minikube cluster, run the following command, adjusting the CPU and memory settings to match your configuration.  You want to give the stack as much memory as possible to get good working performance.</p>
+<p>Start minikube.  The commands below are recommended minimum resource values.  If you have a larger machine you may want to increase CPUs, memory or disk to provide additional resources to minikube:
+    mac : <code>minikube start --addons=dashboard --addons=ingress --addons=olm --addons=metrics-server --addons=istio-provisioner --addons=istio --cpus=4 --disk-size=50g --memory=12g --embed-certs --driver hyperkit --insecure-registry 192.168.64.2:5000</code>
+    linux : <code>minikube start --addons=dashboard --addons=ingress --addons=olm --addons=metrics-server --addons=istio-provisioner --addons=istio --cpus=4 --disk-size=50g --memory=12g --embed-certs --driver kvm2 --insecure-registry 192.168.64.2:5000</code></p>
+<p>Bring up the dashboard with command <code>minikube dashboard &amp;</code>, switch to <strong>All namespaces</strong> and then highlight <strong>Workloads</strong> in the side menu.  </p>
+<p>Wait until all Deployments are complete (Workload status Deployments circle is all green) before continuing.</p>
+<h3 id="fix-up-insecure-registry-and-domain">Fix up insecure registry and domain<a class="headerlink" href="#fix-up-insecure-registry-and-domain" title="Permanent link">¶</a></h3>
+<p>Verify the cluster ip address with <code>minikube ip</code>.</p>
+<p>If you didn't use the IP address returned by the <code>minikube ip</code> command for the insecure-registry option in the start command, then you need to complete the instructions in this section.  If you were able to use the correct IP address then you can skip to adding the TLS certificates.</p>
+<p>Edit file ${HOME}/.minikube/profiles/minikube/config.json and alter the InsecureRegistry value to the ip address returned by the <code>minikube ip</code> command.</p>
+<p>Do the same with file ~/.minikube/machines/minikube/config.json - ensue the Insecure Registry entry contains the correct IP address.</p>
+<p>Restart minikube with <code>minikube stop</code> then repeat the start command above, replacing the insecure-registry option to the correct IP address for minikube</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>In the rest of the documentation it is assumed that minikube is running on IP address 192.168.64.2.  Wherever you see that address you need to substitute with the IP address of your cluster.</p>
+</div>
+<h2 id="run-the-ansible-installer-to-complete-the-setup">Run the ansible installer to complete the setup<a class="headerlink" href="#run-the-ansible-installer-to-complete-the-setup" title="Permanent link">¶</a></h2>
+<p>In a command window:</p>
+<ul>
+<li>clone this git repository: <code>git clone https://github.com/binnes/cloud-native-toolkit.git</code></li>
+<li>change into the ansible directory: <code>cd cloud-native-toolkit/ansible</code></li>
+<li>ensure required packages are installed <code>pip3 install cryptography</code></li>
+<li>install kubernetes collection <code>ansible-galaxy collection install community.kubernetes</code></li>
+<li>install crypto collection <code>ansible-galaxy collection install community.crypto</code></li>
+<li>install general collection - for docker <code>ansible-galaxy collection install community.general</code></li>
+<li>run the playbook: <code>ansible-playbook --ask-become-pass minicube-playbook.yml</code></li>
+<li>You will be prompted for your user password - this is because some configuration options need admin privileges</li>
+</ul>
+<p>At some point you will be prompted for git credentials for the deployed Gitea server.  The username and password are defined in the vars.yml file to be demo/dem0P4s$.  You can change these if desired.</p>
+<h2 id="post-install-steps">Post install steps<a class="headerlink" href="#post-install-steps" title="Permanent link">¶</a></h2>
+<p>A self-signed root certificate has been generated and used to create the ingress TLS certificate.  This needs to be trusted by your browser to be able to access the various applications.</p>
+<p>The setup script installs the rootCA certificate to the Mac OS keychain, but the command line tool doesn't appear to setup the trust settings correctly.  Go into the Keychain app (found in Applications -&gt; Utilities).  Select the System keychain and Certificates section.  Find the certificate - named <em>[IP address]</em>.nip.io-RootCA.  Change the trust settings to Never Trust, then change back to Always Trust.  When you close the window you should b prompted for your user password, showing that the change has been registered.  This certificate will now be trusted by Safari and Chrome.</p>
+<p>In Firefox you need to import the certificate.  The certificate is located in the .minikube/certs folder within your home folder. (~/.minikube/certs) in a file named rootCA_crt.pem.  In Firefox open the Preferences, then select the Privacy &amp; Security settings.  Scroll down until you see the certificates section then press the View Certificates button.  In the Certificate Manager popup window select the Authorities section then Import... Navigate to the .minikube/certs directory within your home directory and select the rootCA_rt.pem file to import.  Select both checkboxes then hit OK to import the certificate.</p>
+<h2 id="accessing-the-applications">Accessing the applications<a class="headerlink" href="#accessing-the-applications" title="Permanent link">¶</a></h2>
+<p>Minikube runs within a virtual environment on your laptop, so the IP address is not available from outside your system, so by default you need to run on the same machine that minikube is running on.  So launch a browser on the machine and navigate to <code>https://dashboard-tools.[ip address].nip.io</code>.  </p>
+<div class="highlight"><pre><span></span><code>E.g. if ```minikube ip``` returns 192.168.64.2 then the address will be https://dashboard-tools.192.168.64.2.nip.io.
+
+This is the Cloud Native Developer dashboard.  This has links to the applications the Cloud Native Toolkit installed on your cluster.
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Directories beginning with a . are usually hidden on MacOS.  To see them you can press the <strong>Shift-Command-.</strong> key combination</p>
+</div>
+<h3 id="gitea-setup">Gitea setup<a class="headerlink" href="#gitea-setup" title="Permanent link">¶</a></h3>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>If you want to log onto Gitea as an administrator, look in the gitea-init secret in the gitea namespace.  There you will see the credentials for the admin user: the username is gitea_admin and the password is also visible.  </p>
+<p>If you create your own user you can use the admin login to go into the site admin section and promote your user to an administrator.</p>
+</div>
+<ul>
+<li>Register a new account</li>
+<li>Sign into new account</li>
+<li>Goto settings, then Applications, then Generate Token - copy it and don't loose it</li>
+<li>pipeline : 1dfb4040dd49269740926a512727dbc474fac90b</li>
+</ul>
+<h3 id="setup-che">Setup che<a class="headerlink" href="#setup-che" title="Permanent link">¶</a></h3>
+<p>The default user name and password is admin / admin&gt; - need to change password at first login and don't forget what the new admin password is.</p>
+<p><em>[todo - how to create new user account in keycloak]</em></p>
+<h2 id="useful-commands">Useful commands<a class="headerlink" href="#useful-commands" title="Permanent link">¶</a></h2>
+<h3 id="remove-all-completed-pods-successful-or-failed">Remove all completed pods (successful or failed)<a class="headerlink" href="#remove-all-completed-pods-successful-or-failed" title="Permanent link">¶</a></h3>
+<p><code>kubectl get pods --all-namespaces -o wide | egrep -i 'Error|Completed' | awk '{print $2 " --namespace=" $1}' | xargs kubectl delete pod --force=true --wait=false --grace-period=0</code></p>
+<h3 id="manually-run-the-terraform-scripts">manually run the terraform scripts<a class="headerlink" href="#manually-run-the-terraform-scripts" title="Permanent link">¶</a></h3>
+<p><code>docker run -it -e TF_VAR_server_url="https://`minikube ip`:8443" -e TF_VAR_ingress_hostname="`minikube ip`.nip.io" -e TF_VAR_source_control_url="" -e TF_VAR_ibmcloud_api_key="" -v /Users/brian/Cn-Tk/ibm-garage-iteration-zero/terraform:/home/devops/src -v /Users/brian/.kube/config:/home/devops/.kube/config -v /Users/brian/.minikube:/home/devops/.minikube -w /home/devops/src --name cntk-installer quay.io/ibmgaragecloud/cli-tools:v0.10.0-lite /home/devops/src/runTerraform.sh -k -a</code></p>
+<h3 id="install-and-run-local-toolkit">Install and run local toolkit<a class="headerlink" href="#install-and-run-local-toolkit" title="Permanent link">¶</a></h3>
+<ul>
+<li>clone repo</li>
+<li>cd into repo directory .\cloud-native-toolkit\ansible</li>
+<li><code>minikube start --addons=dashboard --addons=ingress --addons=olm --addons=metrics-server --addons=istio-provisioner --addons=istio --cpus=8 --disk-size=250g --memory=48g --embed-certs --driver hyperkit --insecure-registry 172.16.171.2:5000</code></li>
+<li><code>ansible-playbook --ask-become-pass minicube-playbook.yml</code></li>
+</ul>
+<h3 id="to-remove-all">to remove all<a class="headerlink" href="#to-remove-all" title="Permanent link">¶</a></h3>
+<ul>
+<li><code>minikube delete</code></li>
+<li><code>rm -rf ~/.minikube</code></li>
+<li><code>rm -rf ~/Cn-Tk</code></li>
+<li><code>sudo vi /var/db/dhcpd_leases</code> - remove all content (or just the entry for the cluster)</li>
+<li><code>docker ps -a</code> - remove all exited containers</li>
+<li>remove the certificate 172.16.171.2.nip.io-RootCA from the trusted authorities (Keychain app on Mac)</li>
+</ul>
+</article>
+</div>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-nav">
+<nav aria-label="Footer" class="md-footer-nav__inner md-grid">
+<a class="md-footer-nav__link md-footer-nav__link--next" href="WhereToRun.html" rel="next">
+<div class="md-footer-nav__title">
+<div class="md-ellipsis">
+<span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Target environment
+              </div>
+</div>
+<div class="md-footer-nav__button md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"></path></svg>
+</div>
+</a>
+</nav>
+</div>
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+          Material for MkDocs
+        </a>
+ ... <a class="link--pdf-download" download href="pdf/LocalCloudNativeToolkit.pdf" title="PDF">download PDF</a></div>
+</div>
+</div>
+</footer>
+</div>
+<script src="assets/javascripts/vendor.93c04032.min.js"></script>
+<script src="assets/javascripts/bundle.83e5331e.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
+<script>
+        app = initialize({
+          base: ".",
+          features: [],
+          search: Object.assign({
+            worker: "assets/javascripts/worker/search.8c7e0a7e.min.js"
+          }, typeof search !== "undefined" && search)
+        })
+      </script>
+</body>
+</html>
